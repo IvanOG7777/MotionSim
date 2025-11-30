@@ -30,6 +30,10 @@ public:
 	std::string name;
 };
 
+const float GLOBAL_FLOOR = -1.0f;
+const float WINDOW_WIDTH = 1280.0f;
+const float WINDOW_HEIGHT = 720.0f;
+
 GLuint compileShader(GLenum type, const char* src) {
 	GLuint shader = glCreateShader(type);
 	glShaderSource(shader, 1, &src, nullptr);
@@ -74,8 +78,7 @@ GLuint createProgram(const char* vertSrc, const char* fragSrc) {
 
 
 bool squareInMotion(Square& square, float gravity, float deltaTime, float e, float mu, float pointSize, float windowWidth, float windowHeight) {
-	float floorY = -1.0f;
-	float groundY = floorY + pointSize / windowHeight;
+	float groundY = GLOBAL_FLOOR + pointSize / windowHeight;
 	float wallRight = 1.0f + pointSize / windowWidth;
 	float wallLeft = -1.0f + pointSize / windowWidth;
 	float accelerationFriction = mu * gravity;
@@ -144,6 +147,19 @@ bool squareInMotion(Square& square, float gravity, float deltaTime, float e, flo
 	}
 
 	return square.inMotion;
+}
+
+bool isTouchingGround(Square& square) {
+	// for now we will only use bottom to check if its on the floor,
+	// after will most likey change the function to allow objects to slide off its its past a boundry
+	// like if objects are stacked to high and the top object is "passing" the boundry we will be slided off
+	float squaresGround = GLOBAL_FLOOR + square.pointSize / WINDOW_HEIGHT;
+	float halfWidth = square.pointSize / WINDOW_WIDTH;
+	float halfHeight = square.pointSize / WINDOW_HEIGHT;
+	float top = square.pos.y + halfHeight;
+	float bottom = square.pos.y - halfHeight;
+	float left = square.pos.x - halfWidth;
+	float left = square.pos.x - halfWidth;
 }
 
 bool squareCollides(Square& a, Square& b, float windowWidth, float windowHeight) {
@@ -221,7 +237,7 @@ int main() {
 	float deltaTime = 0.016f;
 	int currentStep = 0;
 	float e = 0.8;
-	bool isInMotion = true;
+	
 	int bounceCount = 0;
 	int hitWallCount = 0;
 	float mu = 1.0;
@@ -284,11 +300,6 @@ int main() {
 	// background color
 	glClearColor(0.1f, 0.1f, 0.15f, 1.0f);
 
-
-
-	float windowWidth = 1280.0f;
-	float windowHeight = 720.0f;
-
 	GLuint programA = createProgram(vertexShaderSrc, fragmentShaderSrcA);
 	GLuint programB = createProgram(vertexShaderSrc, fragmentShaderSrcB);
 	if (!programA || !programB) {
@@ -324,7 +335,7 @@ int main() {
 		bool anyMovement = false;
 
 		for (auto& square : squaresVector) {
-			bool moving = squareInMotion(square, Gravity, deltaTime, e, mu, square.pointSize, windowWidth, windowHeight);
+			bool moving = squareInMotion(square, Gravity, deltaTime, e, mu, square.pointSize, WINDOW_WIDTH, WINDOW_HEIGHT);
 			std::cout << "Position of " << square.name;
 			std::cout << "(x,y): " << square.pos.x << "," << square.pos.y;
 			std::cout << std::endl;
@@ -332,7 +343,7 @@ int main() {
 			anyMovement = anyMovement || moving;
 		}
 
-		if (squareCollides(squaresVector[0], squaresVector[1], windowWidth, windowHeight)) {
+		if (squareCollides(squaresVector[0], squaresVector[1], WINDOW_WIDTH, WINDOW_HEIGHT)) {
 			swapVelocities(squaresVector[0], squaresVector[1]);
 		}
 
