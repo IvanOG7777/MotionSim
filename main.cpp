@@ -23,10 +23,18 @@ public:
 	bool yMotion = true;
 	bool xMotion = true;
 	bool inMotion = true;
+	bool touchingGround = false;
 	float groundY;
 	float wallRight;
 	float wallLeft;
 	float mass;
+	float squaresGround;
+	float halfWidth;
+	float halfHeight;
+	float top;
+	float bottom;
+	float left;
+	float right;
 	std::string name;
 };
 
@@ -77,10 +85,10 @@ GLuint createProgram(const char* vertSrc, const char* fragSrc) {
 }
 
 
-bool squareInMotion(Square& square, float gravity, float deltaTime, float e, float mu, float pointSize, float windowWidth, float windowHeight) {
-	float groundY = GLOBAL_FLOOR + pointSize / windowHeight;
-	float wallRight = 1.0f + pointSize / windowWidth;
-	float wallLeft = -1.0f + pointSize / windowWidth;
+bool squareInMotion(Square& square, float gravity, float deltaTime, float e, float mu) {
+	float groundY = GLOBAL_FLOOR + square.pointSize / WINDOW_HEIGHT;
+	float wallRight = 1.0f + square.pointSize / WINDOW_WIDTH;
+	float wallLeft = -1.0f + square.pointSize / WINDOW_WIDTH;
 	float accelerationFriction = mu * gravity;
 
 	if (square.inMotion) {
@@ -149,17 +157,43 @@ bool squareInMotion(Square& square, float gravity, float deltaTime, float e, flo
 	return square.inMotion;
 }
 
-bool isTouchingGround(Square& square) {
+void computeEdges(Square& square) {
 	// for now we will only use bottom to check if its on the floor,
 	// after will most likey change the function to allow objects to slide off its its past a boundry
 	// like if objects are stacked to high and the top object is "passing" the boundry we will be slided off
-	float squaresGround = GLOBAL_FLOOR + square.pointSize / WINDOW_HEIGHT;
-	float halfWidth = square.pointSize / WINDOW_WIDTH;
-	float halfHeight = square.pointSize / WINDOW_HEIGHT;
-	float top = square.pos.y + halfHeight;
-	float bottom = square.pos.y - halfHeight;
-	float left = square.pos.x - halfWidth;
-	float left = square.pos.x - halfWidth;
+	square.squaresGround = GLOBAL_FLOOR + square.pointSize / WINDOW_HEIGHT;
+	square.halfWidth = square.pointSize / WINDOW_WIDTH;
+	square.halfHeight = square.pointSize / WINDOW_HEIGHT;
+	square.top = square.pos.y + square.halfHeight;
+	square.bottom = square.pos.y - square.halfHeight;
+	square.left = square.pos.x - square.halfWidth;
+	square.right = square.pos.x + square.halfWidth;
+}
+
+// bool function to check if square is on the floor
+bool checkFloorSupport(Square& square) { // pass in reference of a square object
+	computeEdges(square); // computes its edges by calling the computeEdges fuction
+
+	// check if squares bottom is <= its own normalized ground coordinate AND the abs of its y velocity is < than 0.000f; 
+	if (square.bottom <= square.squaresGround && std::abs(square.vel.vy) < 0.005f) {
+		// if conditions are true
+		//sets squares touching ground value to true
+		square.touchingGround = true;
+	}
+	// initally set to false so it will return false or true;
+	return square.touchingGround;
+}
+
+// bool function to check if square can be considerd a platfrom
+// this function only considers if the squares y velocity is 0 meaning its not going up or down
+bool isPlatform(Square& square) {
+	computeEdges(square); // computes squares edges
+	bool platform = false;
+	if (std::abs(square.vel.vy) < 0.005f) { // if squares velocity is close to 0
+		platform = true; // say yes it can be used as a platform
+	}
+
+	return platform; // return true or flase if it can be used as a platform
 }
 
 bool squareCollides(Square& a, Square& b, float windowWidth, float windowHeight) {
@@ -181,6 +215,15 @@ bool squareCollides(Square& a, Square& b, float windowWidth, float windowHeight)
 
 	// return true if both dx and dy are smaller that half (width/height)*2
 	return dx < halfWidthA + halfWidthB && dy < halfHeightA + halfHeightB;
+}
+
+void swapVelocities(Square& a, Square& b) {
+	float tempVelX = a.vel.vx;
+	float tempVelY = a.vel.vy;
+	a.vel.vx = b.vel.vx;
+	a.vel.vy = b.vel.vy;
+	b.vel.vx = tempVelX;
+	b.vel.vy = tempVelY;
 }
 
 const char* vertexShaderSrc = R"(
@@ -213,15 +256,6 @@ const char* fragmentShaderSrcB = R"(
 			FragColor = vec4(0.2, 0.8, 1.0, 1.0); // bright cyan
 		}
 	)";
-
-void swapVelocities(Square& a, Square& b) {
-	float tempVelX = a.vel.vx;
-	float tempVelY = a.vel.vy;
-	a.vel.vx = b.vel.vx;
-	a.vel.vy = b.vel.vy;
-	b.vel.vx = tempVelX;
-	b.vel.vy = tempVelY;
-}
 
 int main() {
 
@@ -335,10 +369,7 @@ int main() {
 		bool anyMovement = false;
 
 		for (auto& square : squaresVector) {
-			bool moving = squareInMotion(square, Gravity, deltaTime, e, mu, square.pointSize, WINDOW_WIDTH, WINDOW_HEIGHT);
-			std::cout << "Position of " << square.name;
-			std::cout << "(x,y): " << square.pos.x << "," << square.pos.y;
-			std::cout << std::endl;
+			bool moving = squareInMotion(square, Gravity, deltaTime, e, mu);
 
 			anyMovement = anyMovement || moving;
 		}
