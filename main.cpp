@@ -15,6 +15,26 @@ struct Velocity {
 	float vy;
 };
 
+struct Wall {
+	float rightWall;
+	float leftWall;
+	float topWall;
+	float bottomWall;
+};
+
+struct Edges {
+	float top;
+	float bottom;
+	float left;
+	float right;
+};
+
+struct MotionValues {
+	bool yMotion = true;
+	bool xMotion = true;
+	bool inMotion = true;
+};
+
 class Square {
 public:
 	Position pos;
@@ -41,6 +61,10 @@ public:
 const float GLOBAL_FLOOR = -1.0f;
 const float WINDOW_WIDTH = 1280.0f;
 const float WINDOW_HEIGHT = 720.0f;
+float Gravity = 2.0f; //make sure to keep gravity in NDC. if not it will be too fast
+// calculation is done by 9.8 / wanted real life height
+// ex: 9.8 / 5 meters = 1.96 in NDC
+float deltaTime = 0.016f;
 
 GLuint compileShader(GLenum type, const char* src) {
 	GLuint shader = glCreateShader(type);
@@ -226,6 +250,108 @@ void swapVelocities(Square& a, Square& b) {
 	b.vel.vy = tempVelY;
 }
 
+// function to use one square as a platform
+// here we are assuming that square b has alreay stopped moving in the y direction
+// and that a is still falling on top of it
+void practicePlatform(Square& a, Square& b) { // pass in two square objects
+	computeEdges(b); // compute the edge of square we want as platform (hard coding it for now)
+
+	float halfHeightFalling = a.pointSize / WINDOW_HEIGHT; // calculate the half height of the fall square a
+	float centerY = b.top + halfHeightFalling; // centerY is essentially the new calculated floor for that square
+
+	a.pos.y = centerY; //set a.pos.y to the newly calculated bottom
+	a.vel.vy = 0.0f; // stop moving the objects y velocity
+	a.yMotion = false; // sets a.yMotion to false to indicated we arent moving inthe y direction anymore
+
+	if (std::abs(a.vel.vx) < 0.01f) {
+		a.xMotion = false;
+	}
+}
+
+bool horizontalOverlap(Square& a, Square& b) {
+	computeEdges(a);
+	computeEdges(b);
+	bool overLapping = false;
+	if (a.left < b.right && b.left < a.right) {
+		overLapping = true;
+	}
+
+	return overLapping;
+}
+
+float getFloorSupportHeight(Square& square) {
+	float halfHeight = square.pointSize / WINDOW_HEIGHT;
+	return halfHeight + GLOBAL_FLOOR;
+}
+
+float getPlatformSupportHeight(Square& falling, Square& platform) {
+	computeEdges(platform);
+
+	float halfHeightFalling = falling.pointSize / WINDOW_HEIGHT;
+
+	return platform.top + halfHeightFalling;
+}
+
+float findSupportHeightForSquare(Square& falling, std::vector<Square> &squares) {
+	float bestSupport = getFloorSupportHeight(falling);
+
+	for (auto& squareP : squares) {
+
+		if (&squareP == &falling) { // still falling ignore this one since it can be a platform
+			continue;
+		}
+
+		if (!isPlatform(squareP)) {
+			continue;
+		}
+
+		if (!horizontalOverlap(falling, squareP)) {
+			continue;
+		}
+
+		computeEdges(falling);
+		computeEdges(squareP);
+
+		if (squareP.top > falling.pos.y) {
+			continue;
+		}
+
+		Square& platform = squareP;
+		computeEdges(platform);
+		if (platform.top > falling.pos.y) continue;
+
+		float cannidate = getPlatformSupportHeight(falling, platform);
+
+		if (cannidate <= falling.pos.y && cannidate > bestSupport) {
+			bestSupport = cannidate;
+		}
+	}
+
+	return bestSupport;
+}
+
+void updateSqureWithPlatforms(Square& square, std::vector<Square> &squares) {
+	square.vel.vy = square.vel.vy - Gravity * deltaTime;
+	square.pos.y = square.pos.y + square.vel.vy * deltaTime;
+	square.pos.x = square.pos.x + square.vel.vx * deltaTime;
+
+	float supportHeight = findSupportHeightForSquare(square, squares);
+
+	if (square.pos.y < supportHeight && square.vel.vy < 0) {
+		square.pos.y = supportHeight;
+		square.vel.vy = 0.0f;
+		square.yMotion = false;
+	}
+
+	computeEdges(square);
+}
+
+void updateAllSquares(std::vector<Square> &squares) {
+	for (auto& square : squares) {
+		updateSqureWithPlatforms(square, squares);
+	}
+}
+
 const char* vertexShaderSrc = R"(
 		#version 330 core
 		layout (location = 0) in vec2 aPos;
@@ -264,11 +390,6 @@ int main() {
 	Square squareC;
 	std::vector<Square> squaresVector;
 
-
-	float Gravity = 2.0f; //make sure to keep gravity in NDC. if not it will be too fast
-	// calculation is done by 9.8 / wanted real life height
-	// ex: 9.8 / 5 meters = 1.96 in NDC
-	float deltaTime = 0.016f;
 	int currentStep = 0;
 	float e = 0.8;
 	
@@ -367,15 +488,15 @@ int main() {
 
 	while (!glfwWindowShouldClose(window)) {
 		bool anyMovement = false;
+		updateAllSquares(squaresVector);
 
 		for (auto& square : squaresVector) {
 			bool moving = squareInMotion(square, Gravity, deltaTime, e, mu);
+			computeEdges(square);
+			std::cout << square.name << " Y pos: " << square.pos.y << std::endl;
+			std::cout << square.name << " Bottom edge " << square.bottom << std::endl;
 
 			anyMovement = anyMovement || moving;
-		}
-
-		if (squareCollides(squaresVector[0], squaresVector[1], WINDOW_WIDTH, WINDOW_HEIGHT)) {
-			swapVelocities(squaresVector[0], squaresVector[1]);
 		}
 
 		if (!anyMovement) {
