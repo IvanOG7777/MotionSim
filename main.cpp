@@ -108,77 +108,77 @@ GLuint createProgram(const char* vertSrc, const char* fragSrc) {
 	return program;
 }
 
+void squaresInMotion(std::vector<Square>& squares, float gravity, float deltaTime, float e, float mu) {
 
-bool squareInMotion(Square& square, float gravity, float deltaTime, float e, float mu) {
-	float groundY = GLOBAL_FLOOR + square.pointSize / WINDOW_HEIGHT;
-	float wallRight = 1.0f + square.pointSize / WINDOW_WIDTH;
-	float wallLeft = -1.0f + square.pointSize / WINDOW_WIDTH;
-	float accelerationFriction = mu * gravity;
+	for (auto& square : squares) {
+		float groundY = GLOBAL_FLOOR + square.pointSize / WINDOW_HEIGHT;
+		float wallRight = 1.0f + square.pointSize / WINDOW_WIDTH;
+		float wallLeft = -1.0f + square.pointSize / WINDOW_WIDTH;
+		float accelerationFriction = mu * gravity;
 
-	if (square.inMotion) {
-		square.vel.vy = square.vel.vy - gravity * deltaTime;
-		square.pos.x = square.pos.x + square.vel.vx * deltaTime;
-		square.pos.y += square.vel.vy * deltaTime;
+		if (square.inMotion) {
+			square.vel.vy = square.vel.vy - gravity * deltaTime;
+			square.pos.x = square.pos.x + square.vel.vx * deltaTime;
+			square.pos.y += square.vel.vy * deltaTime;
 
-		if (square.pos.y <= groundY) {
-			square.pos.y = groundY; // snap the pos.y to be the groundY
+			if (square.pos.y <= groundY) {
+				square.pos.y = groundY; // snap the pos.y to be the groundY
 
-			//check if vel.vy is negative meaning its falling
-			// if it is we enter the block
-			if (square.vel.vy < 0.0f) {
-				// invert velocity upward and reduce velocity a bit by e
-				square.vel.vy = -square.vel.vy * e;
+				//check if vel.vy is negative meaning its falling
+				// if it is we enter the block
+				if (square.vel.vy < 0.0f) {
+					// invert velocity upward and reduce velocity a bit by e
+					square.vel.vy = -square.vel.vy * e;
 
-				// check the ABS of current velocity is very small
-				// this prevents very small bounces
-				if (std::abs(square.vel.vy) < 0.05f) {
-					square.vel.vy = 0.0f; // make velocity 0
-					square.pos.y = groundY;
-					square.yMotion = false;
+					// check the ABS of current velocity is very small
+					// this prevents very small bounces
+					if (std::abs(square.vel.vy) < 0.05f) {
+						square.vel.vy = 0.0f; // make velocity 0
+						square.pos.y = groundY;
+						square.yMotion = false;
+					}
 				}
 			}
-		}
 
-		// checks if both pos.y and the velocity are at 0. No more y movement
-		if (square.pos.y == groundY && square.vel.vy == 0.0f) {
-			// we check if 
-			if (square.vel.vx > 0.0f) {
-				square.vel.vx -= accelerationFriction * deltaTime;
-				if (square.vel.vx < 0.0f) {
-					square.vel.vx = 0.0f;
-				}
-			}
-			else if (square.vel.vx < 0.0f) {
-				square.vel.vx += accelerationFriction * deltaTime;
+			// checks if both pos.y and the velocity are at 0. No more y movement
+			if (square.pos.y == groundY && square.vel.vy == 0.0f) {
+				// we check if
 				if (square.vel.vx > 0.0f) {
+					square.vel.vx -= accelerationFriction * deltaTime;
+					if (square.vel.vx < 0.0f) {
+						square.vel.vx = 0.0f;
+					}
+				}
+				else if (square.vel.vx < 0.0f) {
+					square.vel.vx += accelerationFriction * deltaTime;
+					if (square.vel.vx > 0.0f) {
+						square.vel.vx = 0.0f;
+					}
+				}
+
+				if (std::abs(square.vel.vx) < 0.5f) {
 					square.vel.vx = 0.0f;
+					square.xMotion = false;
 				}
 			}
 
-			if (std::abs(square.vel.vx) < 0.5f) {
-				square.vel.vx = 0.0f;
-				square.xMotion = false;
+			//two if block to keep ball within the boundries
+
+			//if pos.x is greater than the right wall NDC 1.0f AND vel.vs is greater than 0
+			if (square.pos.x >= wallRight && square.vel.vx > 0) {
+				square.pos.x = wallRight; // snap the position of x to the right wall
+				square.vel.vx = -square.vel.vx * e; // invert the velocity backwards and reduce velocity a bit by e
 			}
+
+			//if pos.x is less than the left wall NDC -1.0f AND vel.vs is less than 0
+			if (square.pos.x <= wallLeft && square.vel.vx < 0) {
+				square.pos.x = wallLeft; // snap the position of x to the left wall
+				square.vel.vx = -square.vel.vx * e; // invert the velocity backwards and reduce velocity a bit by e
+			}
+
+			if (!square.xMotion && !square.yMotion) square.inMotion = false;
 		}
-
-		//two if block to keep ball within the boundries
-
-		//if pos.x is greater than the right wall NDC 1.0f AND vel.vs is greater than 0
-		if (square.pos.x >= wallRight && square.vel.vx > 0) {
-			square.pos.x = wallRight; // snap the position of x to the right wall
-			square.vel.vx = -square.vel.vx * e; // invert the velocity backwards and reduce velocity a bit by e
-		}
-
-		//if pos.x is less than the left wall NDC -1.0f AND vel.vs is less than 0
-		if (square.pos.x <= wallLeft && square.vel.vx < 0) {
-			square.pos.x = wallLeft; // snap the position of x to the left wall
-			square.vel.vx = -square.vel.vx * e; // invert the velocity backwards and reduce velocity a bit by e
-		}
-
-		if (!square.xMotion && !square.yMotion) square.inMotion = false;
 	}
-
-	return square.inMotion;
 }
 
 void computeEdges(Square& square) {
@@ -487,10 +487,13 @@ int main() {
 	GLint uPointSizeLocB = glGetUniformLocation(programB, "uPointSize");
 
 	while (!glfwWindowShouldClose(window)) {
-		bool anyMovement = false;
-		updateAllSquares(squaresVector);
+		/*bool anyMovement = false;*/
+		/*updateAllSquares(squaresVector);*/
 
-		for (auto& square : squaresVector) {
+		squaresInMotion(squaresVector, Gravity, deltaTime, e, mu);
+		
+
+		/*for (auto& square : squaresVector) {
 			bool moving = squareInMotion(square, Gravity, deltaTime, e, mu);
 			computeEdges(square);
 			std::cout << square.name << " Y pos: " << square.pos.y << std::endl;
@@ -501,7 +504,7 @@ int main() {
 
 		if (!anyMovement) {
 			glfwSetWindowShouldClose(window, GLFW_TRUE);
-		}
+		}*/
 
 
 		glClear(GL_COLOR_BUFFER_BIT);
