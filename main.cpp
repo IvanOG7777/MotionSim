@@ -220,6 +220,8 @@ bool isPlatform(Square& square) {
 	return platform; // return true or flase if it can be used as a platform
 }
 
+// TODO: Square collides with another square IF its NOT WORLD WALL or WORLD BOTTOM/TOP
+// This logically will mean that if it hits anything that isnt a WORLD boundry it has to be another square
 bool squareCollides(Square& a, Square& b, float windowWidth, float windowHeight) {
 
 	// gets the center of both squares. Since both have pointSize of 15 units this is fine for now

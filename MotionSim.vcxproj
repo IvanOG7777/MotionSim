@@ -71,20 +71,20 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\Users\elder\OneDrive\Desktop\C++Projects\MotionSim\Libraries\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\elder\OneDrive\Desktop\C++Projects\MotionSim\Libraries\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\sexyz\Desktop\C+Projects\MotionSim\Libraries\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\sexyz\Desktop\C+Projects\MotionSim\Libraries\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>C:\Users\elder\OneDrive\Desktop\C++Projects\MotionSim\Libraries\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\elder\OneDrive\Desktop\C++Projects\MotionSim\Libraries\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\sexyz\Desktop\C+Projects\MotionSim\Libraries\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\sexyz\Desktop\C+Projects\MotionSim\Libraries\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\elder\OneDrive\Desktop\C++Projects\MotionSim\Libraries\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\elder\OneDrive\Desktop\C++Projects\MotionSim\Libraries\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\sexyz\Desktop\C+Projects\MotionSim\Libraries\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\sexyz\Desktop\C+Projects\MotionSim\Libraries\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Users\elder\OneDrive\Desktop\C++Projects\MotionSim\Libraries\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\elder\OneDrive\Desktop\C++Projects\MotionSim\Libraries\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Users\sexyz\Desktop\C+Projects\MotionSim\Libraries\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\sexyz\Desktop\C+Projects\MotionSim\Libraries\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -145,6 +145,11 @@
   <ItemGroup>
     <ClCompile Include="glad.c" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="squareFunctions.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="globalConstants.h" />
+    <ClInclude Include="squareFunction.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
