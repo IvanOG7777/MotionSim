@@ -104,11 +104,9 @@ int main() {
 	std::vector<Square> squaresVector;
 
 	int currentStep = 0;
-	float e = 0.8;
 	
 	int bounceCount = 0;
 	int hitWallCount = 0;
-	float mu = 1.0;
 	float accelerationFriction = mu * Gravity;
 	int index = 0;
 
@@ -232,7 +230,8 @@ int main() {
 		/*updateAllSquares(squaresVector);*/
 
 		squaresInMotion(squaresVector, Gravity, deltaTime, e, mu);
-		collisionDetectionNestedLoop(squaresVector);
+		/*collisionDetectionNestedLoop(squaresVector);*/
+		collisionDetectionSweepAndPrune(squaresVector);
 	
 
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -266,8 +265,8 @@ int main() {
 			if (i == 3) {
 				// squareB
 				glUseProgram(programD);
-				glUniform2f(uPositionLocC, square.pos.x, square.pos.y);
-				glUniform1f(uPointSizeLocC, square.pointSize);
+				glUniform2f(uPositionLocD, square.pos.x, square.pos.y);
+				glUniform1f(uPointSizeLocD, square.pointSize);
 			}
 
 			glDrawArrays(GL_POINTS, 0, 1);

@@ -71,3 +71,6 @@ void updateSqureWithPlatforms(Square& square, std::vector<Square>& squares);
 void updateAllSquares(std::vector<Square>& squares);
 bool isOnTop(Square& squareA, Square& squareB);
 void collisionDetectionNestedLoop(std::vector<Square>& squares);
+void mergeHelper(std::vector<Square>& leftArray, std::vector<Square>& rightArray, std::vector <Square>& sorted);
+void mergeSort(std::vector<Square> &squares);
+void collisionDetectionSweepAndPrune(std::vector<Square> &squares);

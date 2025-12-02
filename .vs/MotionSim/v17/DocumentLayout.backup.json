@@ -26,7 +26,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Bookmark",
@@ -40,9 +40,10 @@
               "RelativeDocumentMoniker": "globalConstants.h",
               "ToolTip": "C:\\Users\\elder\\OneDrive\\Desktop\\C\u002B\u002BProjects\\MotionSim\\globalConstants.h",
               "RelativeToolTip": "globalConstants.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAbAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-12-01T21:54:45.02Z"
+              "WhenOpened": "2025-12-01T21:54:45.02Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -52,7 +53,7 @@
               "RelativeDocumentMoniker": "squareFunctions.cpp",
               "ToolTip": "C:\\Users\\elder\\OneDrive\\Desktop\\C\u002B\u002BProjects\\MotionSim\\squareFunctions.cpp",
               "RelativeToolTip": "squareFunctions.cpp",
-              "ViewState": "AgIAAPMAAAAAAAAAAAAswAkBAAAwAAAAAAAAAA==",
+              "ViewState": "AgIAAEoBAAAAAAAAAAAAAFQBAAAKAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-12-01T21:53:31.706Z",
               "EditorCaption": ""
@@ -65,7 +66,7 @@
               "RelativeDocumentMoniker": "squareFunction.h",
               "ToolTip": "C:\\Users\\elder\\OneDrive\\Desktop\\C\u002B\u002BProjects\\MotionSim\\squareFunction.h",
               "RelativeToolTip": "squareFunction.h",
-              "ViewState": "AgIAACwAAAAAAAAAAAAAAEQAAABQAAAAAAAAAA==",
+              "ViewState": "AgIAADoAAAAAAAAAAAAIwEoAAAAtAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2025-12-01T21:53:11.761Z",
               "EditorCaption": ""
@@ -78,12 +79,12 @@
       "Orientation": 0,
       "VerticalTabListWidth": 256,
       "FloatingWindowState": {
-        "Id": "c34cb1f0-2677-4cdb-9874-2b595e296cbd",
+        "Id": "1f2bab88-6aaa-4ded-9f0a-0af16d963934",
         "Display": 1,
-        "X": 277,
-        "Y": 151,
+        "X": 110,
+        "Y": 96,
         "Width": 1397,
-        "Height": 982,
+        "Height": 732,
         "WindowState": 0
       },
       "DocumentGroups": [
@@ -99,9 +100,9 @@
               "RelativeDocumentMoniker": "main.cpp",
               "ToolTip": "C:\\Users\\elder\\OneDrive\\Desktop\\C\u002B\u002BProjects\\MotionSim\\main.cpp",
               "RelativeToolTip": "main.cpp",
-              "ViewState": "AgIAAGwAAAAAAAAAAAAAAIYAAAAXAAAAAAAAAA==",
+              "ViewState": "AgIAANIAAAAAAAAAAAAAAOUAAAAmAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-12-01T23:50:40.723Z",
+              "WhenOpened": "2025-12-02T19:44:38.028Z",
               "EditorCaption": ""
             }
           ]
