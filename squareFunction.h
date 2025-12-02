@@ -69,3 +69,5 @@ float getPlatformSupportHeight(Square& falling, Square& platform);
 float findSupportHeightForSquare(Square& falling, std::vector<Square>& squares);
 void updateSqureWithPlatforms(Square& square, std::vector<Square>& squares);
 void updateAllSquares(std::vector<Square>& squares);
+bool isOnTop(Square& squareA, Square& squareB);
+void collisionDetectionNestedLoop(std::vector<Square>& squares);

@@ -1,3 +1,2 @@
-﻿  main.cpp
-C:\Users\elder\OneDrive\Desktop\C++Projects\MotionSim\main.cpp(91,10): warning C4305: 'initializing': truncation from 'double' to 'float'
+﻿  squareFunctions.cpp
   MotionSim.vcxproj -> C:\Users\elder\OneDrive\Desktop\C++Projects\MotionSim\x64\Debug\MotionSim.exe

@@ -6,6 +6,7 @@
 void squaresInMotion(std::vector<Square>& squares, float gravity, float deltaTime, float e, float mu) {
 
 	for (auto& square : squares) {
+		computeEdges(square);
 		float groundY = GLOBAL_FLOOR + square.pointSize / WINDOW_HEIGHT;
 		float wallRight = 1.0f + square.pointSize / WINDOW_WIDTH;
 		float wallLeft = -1.0f + square.pointSize / WINDOW_WIDTH;
@@ -108,7 +109,7 @@ bool checkFloorSupport(Square& square) { // pass in reference of a square object
 bool isPlatform(Square& square) {
 	computeEdges(square); // computes squares edges
 	bool platform = false;
-	if (std::abs(square.vel.vy) < 0.005f) { // if squares velocity is close to 0
+	if (std::abs(square.vel.vy) < 0.05f) { // if squares velocity is close to 0
 		platform = true; // say yes it can be used as a platform
 	}
 
@@ -117,14 +118,16 @@ bool isPlatform(Square& square) {
 
 // TODO: Square collides with another square IF its NOT WORLD WALL or WORLD BOTTOM/TOP
 // This logically will mean that if it hits anything that isnt a WORLD boundry it has to be another square
-bool squareCollides(Square& a, Square& b, float windowWidth, float windowHeight) {
+bool squareCollides(Square& a, Square& b) {
 
 	// gets the center of both squares. Since both have pointSize of 15 units this is fine for now
 	// will not work if one or the other has a different point size
-	float halfWidthA = a.pointSize / windowWidth;
-	float halfHeightA = a.pointSize / windowHeight;
-	float halfWidthB = b.pointSize / windowWidth;
-	float halfHeightB = b.pointSize / windowHeight;
+	float halfWidthA = a.pointSize / WINDOW_WIDTH;
+	float halfHeightA = a.pointSize / WINDOW_HEIGHT;
+	float halfWidthB = b.pointSize / WINDOW_WIDTH;
+	float halfHeightB = b.pointSize / WINDOW_HEIGHT;
+	float halfWidthSum = halfWidthA + halfWidthB;
+	float halfHeightSum = halfHeightA+ halfHeightB;
 
 	// difference in x and y values between x and y positions
 	float dx = a.pos.x - b.pos.x;
@@ -135,7 +138,7 @@ bool squareCollides(Square& a, Square& b, float windowWidth, float windowHeight)
 	dy = std::abs(dy);
 
 	// return true if both dx and dy are smaller that half (width/height)*2
-	return dx < halfWidthA + halfWidthB && dy < halfHeightA + halfHeightB;
+	return dx < halfWidthSum && dy < halfHeightSum;
 }
 
 void swapVelocities(Square& a, Square& b) {
@@ -246,5 +249,43 @@ void updateSqureWithPlatforms(Square& square, std::vector<Square>& squares) {
 void updateAllSquares(std::vector<Square>& squares) {
 	for (auto& square : squares) {
 		updateSqureWithPlatforms(square, squares);
+	}
+}
+
+bool isOnTop(Square& squareA, Square& squareB) {
+	// recompute the edges of the squares we are comparing
+	computeEdges(squareA);
+	computeEdges(squareB);
+
+	// test to see if the bottom square, square a
+	bool verticalTouch = std::abs(squareA.bottom - squareB.top) < 0.05f;
+	bool horizontalOverlap =
+		(squareA.right > squareB.left) && (squareA.left < squareB.right);
+	bool fallingOrResting = squareA.vel.vy <= 0.0f;
+
+	return verticalTouch && horizontalOverlap && fallingOrResting;
+}
+
+void collisionDetectionNestedLoop(std::vector<Square>& squares) {
+	for (int i = 0; i < squares.size(); i++) {
+		for (int j = i + 1; j < squares.size(); j++) {
+			if (squareCollides(squares[i], squares[j])) {
+				if (isPlatform(squares[j]) && isOnTop(squares[i], squares[j])) {
+					squares[i].pos.y = squares[j].top + squares[i].halfHeight;
+					squares[i].vel.vy = 0.0f;
+					squares[i].yMotion = false;
+					squares[i].inMotion = false;
+				}
+				else if (isPlatform(squares[i]) && isOnTop(squares[j], squares[i])) {
+					squares[j].pos.y = squares[i].top + squares[j].halfHeight;
+					squares[j].vel.vy = 0.0f;
+					squares[j].yMotion = false;
+					squares[j].inMotion = false;
+				}
+				else {
+					swapVelocities(squares[i], squares[j]);
+				}
+			}
+		}
 	}
 }

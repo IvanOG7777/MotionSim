@@ -77,11 +77,30 @@ const char* fragmentShaderSrcB = R"(
 		}
 	)";
 
+const char* fragmentShaderSrcC = R"(
+		#version 330 core
+		out vec4 FragColor;
+
+		void main() {
+			FragColor = vec4(1.0, 0.7, 0.8, 0.4); // solid red
+		}
+	)";
+
+const char* fragmentShaderSrcD = R"(
+		#version 330 core
+		out vec4 FragColor;
+
+		void main() {
+			FragColor = vec4(0.2, 0.8, 0.0, -1.0); // bright cyan
+		}
+	)";
+
 int main() {
 
 	Square squareA;
 	Square squareB;
 	Square squareC;
+	Square squareD;
 	std::vector<Square> squaresVector;
 
 	int currentStep = 0;
@@ -113,8 +132,28 @@ int main() {
 	squareB.pointSize = 30.0f;
 	squareB.name = "SquareB";
 
+	squareC.pos.x = -0.2f;
+	squareC.pos.y = 1.0f;
+
+	squareC.vel.vx = -0.10f;
+	squareC.vel.vy = -0.3f;
+
+	squareC.pointSize = 60.0f;
+	squareC.name = "SquareC";
+
+	squareD.pos.x = 0.5f;
+	squareD.pos.y = -0.6f;
+
+	squareD.vel.vx = -0.2f;
+	squareD.vel.vy = 0.5f;
+
+	squareD.pointSize = 50.0f;
+	squareD.name = "SquareD";
+
 	squaresVector.push_back(squareA);
 	squaresVector.push_back(squareB);
+	squaresVector.push_back(squareC);
+	squaresVector.push_back(squareD);
 
 
 	/* Initialize the library */
@@ -151,7 +190,9 @@ int main() {
 
 	GLuint programA = createProgram(vertexShaderSrc, fragmentShaderSrcA);
 	GLuint programB = createProgram(vertexShaderSrc, fragmentShaderSrcB);
-	if (!programA || !programB) {
+	GLuint programC = createProgram(vertexShaderSrc, fragmentShaderSrcC);
+	GLuint programD = createProgram(vertexShaderSrc, fragmentShaderSrcD);
+	if (!programA || !programB || !programC || !programD) {
 		glfwTerminate();
 		return -1;
 	}
@@ -180,11 +221,18 @@ int main() {
 	GLint uPositionLocB = glGetUniformLocation(programB, "uPosition");
 	GLint uPointSizeLocB = glGetUniformLocation(programB, "uPointSize");
 
+	GLint uPositionLocC = glGetUniformLocation(programC, "uPosition");
+	GLint uPointSizeLocC = glGetUniformLocation(programC, "uPointSize");
+
+	GLint uPositionLocD = glGetUniformLocation(programD, "uPosition");
+	GLint uPointSizeLocD = glGetUniformLocation(programD, "uPointSize");
+
 	while (!glfwWindowShouldClose(window)) {
 		/*bool anyMovement = false;*/
 		/*updateAllSquares(squaresVector);*/
 
 		squaresInMotion(squaresVector, Gravity, deltaTime, e, mu);
+		collisionDetectionNestedLoop(squaresVector);
 	
 
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -200,11 +248,26 @@ int main() {
 				glUniform2f(uPositionLocA, square.pos.x, square.pos.y);
 				glUniform1f(uPointSizeLocA, square.pointSize);
 			}
-			else {
+
+			if (i == 1) {
 				// squareB
 				glUseProgram(programB);
 				glUniform2f(uPositionLocB, square.pos.x, square.pos.y);
 				glUniform1f(uPointSizeLocB, square.pointSize);
+			}
+
+			if (i == 2) {
+				// squareB
+				glUseProgram(programC);
+				glUniform2f(uPositionLocC, square.pos.x, square.pos.y);
+				glUniform1f(uPointSizeLocC, square.pointSize);
+			}
+
+			if (i == 3) {
+				// squareB
+				glUseProgram(programD);
+				glUniform2f(uPositionLocC, square.pos.x, square.pos.y);
+				glUniform1f(uPointSizeLocC, square.pointSize);
 			}
 
 			glDrawArrays(GL_POINTS, 0, 1);
@@ -218,6 +281,8 @@ int main() {
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteProgram(programA);
 	glDeleteProgram(programB);
+	glDeleteProgram(programC);
+	glDeleteProgram(programD);
 
 	glfwTerminate();
 
