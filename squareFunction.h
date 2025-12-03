@@ -72,4 +72,3 @@ void updateAllSquares(std::vector<Square>& squares);
 bool isOnTop(Square& squareA, Square& squareB);
 void collisionDetectionNestedLoop(std::vector<Square>& squares);
 void collisionDetectionSweepAndPrune(std::vector<Square> &squares);
-void SAP(std::vector<Square>& squares);

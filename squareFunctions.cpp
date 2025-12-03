@@ -2,6 +2,8 @@
 #include "squareFunction.h"
 #include <cmath>
 #include <vector>
+#include <algorithm>
+#include <iostream>
 
 void squaresInMotion(std::vector<Square>& squares) {
 
@@ -95,7 +97,7 @@ bool checkFloorSupport(Square& square) { // pass in reference of a square object
 	computeEdges(square); // computes its edges by calling the computeEdges fuction
 
 	// check if squares bottom is <= its own normalized ground coordinate AND the abs of its y velocity is < than 0.000f; 
-	if (square.bottom <= square.squaresGround && std::abs(square.vel.vy) < 0.005f) {
+	if (square.bottom <= square.squaresGround && std::abs(square.vel.vy) < 0.0005f) {
 		// if conditions are true
 		//sets squares touching ground value to true
 		square.touchingGround = true;
@@ -109,7 +111,7 @@ bool checkFloorSupport(Square& square) { // pass in reference of a square object
 bool isPlatform(Square& square) {
 	computeEdges(square); // computes squares edges
 	bool platform = false;
-	if (std::abs(square.vel.vy) < 0.05f) { // if squares velocity is close to 0
+	if (std::abs(square.vel.vy) < 0.0005f) { // if squares velocity is close to 0
 		platform = true; // say yes it can be used as a platform
 	}
 
@@ -163,7 +165,7 @@ void practicePlatform(Square& a, Square& b) { // pass in two square objects
 	a.vel.vy = 0.0f; // stop moving the objects y velocity
 	a.yMotion = false; // sets a.yMotion to false to indicated we arent moving inthe y direction anymore
 
-	if (std::abs(a.vel.vx) < 0.01f) {
+	if (std::abs(a.vel.vx) < 0.001f) {
 		a.xMotion = false;
 	}
 }
@@ -258,7 +260,7 @@ bool isOnTop(Square& squareA, Square& squareB) {
 	computeEdges(squareB);
 
 	// test to see if the bottom square, square a
-	bool verticalTouch = std::abs(squareA.bottom - squareB.top) < 0.05f;
+	bool verticalTouch = std::abs(squareA.bottom - squareB.top) < 0.005f;
 	bool horizontalOverlap =
 		(squareA.right > squareB.left) && (squareA.left < squareB.right);
 	bool fallingOrResting = squareA.vel.vy <= 0.0f;
@@ -267,7 +269,6 @@ bool isOnTop(Square& squareA, Square& squareB) {
 }
 
 void collisionDetectionNestedLoop(std::vector<Square>& squares) {
-	squaresInMotion(squares);
 	for (int i = 0; i < squares.size(); i++) {
 		for (int j = i + 1; j < squares.size(); j++) {
 			if (squareCollides(squares[i], squares[j])) {
@@ -292,11 +293,69 @@ void collisionDetectionNestedLoop(std::vector<Square>& squares) {
 }
 
 void collisionDetectionSweepAndPrune(std::vector<Square> &squares) {
-	squaresInMotion(squares); // already computes edges and movemnet per square
+	std::vector<int> sorted;
+	sorted.reserve(squares.size());
 
-	std::vector<int> minValues;
-	int k = 0;
-	while (k < squares.size()) {
+	for (int i = 0; i < squares.size(); i++) {
+		sorted.push_back(i);
+	}
+	
+	std::sort(sorted.begin(), sorted.end(),
+		[&](int a, int b) {
+			return squares[a].left < squares[b].left;
+		}
+	);
 
+	std::vector<int> active;
+	std::vector<std::pair<int, int>> candidatePairs;
+	for (auto indexCurrent : sorted) {
+		Square& current = squares[indexCurrent];
+
+		int k = 0;
+
+		while (k < active.size()) {
+			Square& other = squares[active[k]];
+
+			if (other.right < current.left) {
+				active.erase(active.begin() + k);
+			}
+			else {
+				++k;
+			}
+		}
+
+		for (auto indexOther : active) {
+			int i = indexOther;
+			int j = indexCurrent;
+			if (i > j) std::swap(i, j);
+			candidatePairs.emplace_back(i, j);
+			
+		}
+
+		std::sort(candidatePairs.begin(), candidatePairs.end());
+
+		for (auto pair : candidatePairs) {
+			int i = pair.first;
+			int j = pair.second;
+			if (squareCollides(squares[i], squares[j])) {
+				if (isPlatform(squares[j]) && isOnTop(squares[i], squares[j])) {
+					squares[i].pos.y = squares[j].top + squares[i].halfHeight;
+					squares[i].vel.vy = 0.0f;
+					squares[i].yMotion = false;
+					squares[i].inMotion = false;
+				}
+				else if (isPlatform(squares[i]) && isOnTop(squares[j], squares[i])) {
+					squares[j].pos.y = squares[i].top + squares[j].halfHeight;
+					squares[j].vel.vy = 0.0f;
+					squares[j].yMotion = false;
+					squares[j].inMotion = false;
+				}
+				else {
+					swapVelocities(squares[i], squares[j]);
+				}
+			}
+		}
+
+		active.push_back(indexCurrent);
 	}
 }

@@ -142,7 +142,7 @@ int main() {
 	squareD.pos.x = 0.5f;
 	squareD.pos.y = -0.6f;
 
-	squareD.vel.vx = -0.2f;
+	squareD.vel.vx = -0.3f;
 	squareD.vel.vy = 0.5f;
 
 	squareD.pointSize = 50.0f;
@@ -230,8 +230,8 @@ int main() {
 		/*updateAllSquares(squaresVector);*/
 
 		/*collisionDetectionNestedLoop(squaresVector);*/
+		squaresInMotion(squaresVector);
 		collisionDetectionSweepAndPrune(squaresVector);
-		/*SAP(squaresVector);*/
 	
 
 		glClear(GL_COLOR_BUFFER_BIT);
