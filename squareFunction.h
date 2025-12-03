@@ -56,11 +56,11 @@ public:
 	std::string name;
 };
 
-void squaresInMotion(std::vector<Square>& squares, float gravity, float deltaTime, float e, float mu);
+void squaresInMotion(std::vector<Square>& squares);
 void computeEdges(Square& square);
 bool checkFloorSupport(Square& square);
 bool isPlatform(Square& square);
-bool squareCollides(Square& a, Square& b, float windowWidth, float windowHeight);
+bool squareCollides(Square& a, Square& b);
 void swapVelocities(Square& a, Square& b);
 void practicePlatform(Square& a, Square& b);
 bool horizontalOverlap(Square& a, Square& b);
@@ -71,6 +71,5 @@ void updateSqureWithPlatforms(Square& square, std::vector<Square>& squares);
 void updateAllSquares(std::vector<Square>& squares);
 bool isOnTop(Square& squareA, Square& squareB);
 void collisionDetectionNestedLoop(std::vector<Square>& squares);
-void mergeHelper(std::vector<Square>& leftArray, std::vector<Square>& rightArray, std::vector <Square>& sorted);
-void mergeSort(std::vector<Square> &squares);
 void collisionDetectionSweepAndPrune(std::vector<Square> &squares);
+void SAP(std::vector<Square>& squares);

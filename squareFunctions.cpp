@@ -3,17 +3,17 @@
 #include <cmath>
 #include <vector>
 
-void squaresInMotion(std::vector<Square>& squares, float gravity, float deltaTime, float e, float mu) {
+void squaresInMotion(std::vector<Square>& squares) {
 
 	for (auto& square : squares) {
 		computeEdges(square);
 		float groundY = GLOBAL_FLOOR + square.pointSize / WINDOW_HEIGHT;
 		float wallRight = 1.0f + square.pointSize / WINDOW_WIDTH;
 		float wallLeft = -1.0f + square.pointSize / WINDOW_WIDTH;
-		float accelerationFriction = mu * gravity;
+		float accelerationFriction = mu * Gravity;
 
 		if (square.inMotion) {
-			square.vel.vy = square.vel.vy - gravity * deltaTime;
+			square.vel.vy = square.vel.vy - Gravity * deltaTime;
 			square.pos.x = square.pos.x + square.vel.vx * deltaTime;
 			square.pos.y += square.vel.vy * deltaTime;
 
@@ -266,54 +266,8 @@ bool isOnTop(Square& squareA, Square& squareB) {
 	return verticalTouch && horizontalOverlap && fallingOrResting;
 }
 
-void mergeHelper(std::vector<Square> &leftArray, std:: vector<Square> &rightArray, std:: vector <Square> &sorted) {
-
-	size_t leftSide = leftArray.size();
-	size_t rightSide = rightArray.size();
-	size_t i = 0;
-	size_t left = 0;
-	size_t right = 0;
-
-	while (left < leftSide && right < rightSide) {
-		if (leftArray[left].left < rightArray[right].left) {
-			sorted[i] = leftArray[left];
-			left++;
-		}
-		else {
-			sorted[i] = rightArray[right];
-			right++;
-		}
-		i++;
-	}
-
-	while (left < leftSide) {
-		sorted[i] = leftArray[left];
-		left++;
-		i++;
-	}
-
-	while (right < rightSide) {
-		sorted[i] = rightArray[right];
-		right++;
-		i++;
-	}
-}
-
-void mergeSort(std::vector<Square> &squares) {
-	size_t length = squares.size();
-	if (length <= 1) {
-		return;
-	}
-	size_t middle = length / 2;
-	std::vector<Square> left(squares.begin(), squares.begin() + middle);
-	std::vector<Square> right(squares.begin() + middle, squares.end());
-	mergeSort(left);
-	mergeSort(right);
-	mergeHelper(left, right, squares);
-}
-
-
 void collisionDetectionNestedLoop(std::vector<Square>& squares) {
+	squaresInMotion(squares);
 	for (int i = 0; i < squares.size(); i++) {
 		for (int j = i + 1; j < squares.size(); j++) {
 			if (squareCollides(squares[i], squares[j])) {
@@ -338,49 +292,11 @@ void collisionDetectionNestedLoop(std::vector<Square>& squares) {
 }
 
 void collisionDetectionSweepAndPrune(std::vector<Square> &squares) {
-	mergeSort(squares);
-	std::vector <int> active;
-	std::vector<std::pair<Square, Square>> squarePairs;
+	squaresInMotion(squares); // already computes edges and movemnet per square
 
-	for (int i = 0; i < squares.size(); i++) {
+	std::vector<int> minValues;
+	int k = 0;
+	while (k < squares.size()) {
 
-		Square &current = squares[i];
-
-		int k = 0;
-
-		while (k < active.size()) {
-			Square& other = squares[active[k]];
-			if (other.right < current.left) {
-				active.erase(active.begin() + k);
-			}
-			else {
-				k++;
-			}
-		}
-
-
-		for (int &index : active) {
-			Square& A = squares[index];
-			Square& B = current;
-
-			if (squareCollides(A, B)) {
-				if (isPlatform(B) && isOnTop(A, B)) {
-					A.pos.y = B.top + A.halfHeight;
-					A.vel.vy = 0.0f;
-					A.yMotion = false;
-					A.inMotion = false;
-				}
-				else if (isPlatform(A) && isOnTop(B, A)) {
-					B.pos.y = A.top + B.halfHeight;
-					B.vel.vy = 0.0f;
-					B.yMotion = false;
-					B.inMotion = false;
-				}
-				else {
-					swapVelocities(A, B);
-				}
-			}
-		}
-		active.push_back(i);
 	}
 }

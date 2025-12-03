@@ -43,28 +43,28 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "squareFunctions.cpp",
-              "DocumentMoniker": "C:\\Users\\elder\\OneDrive\\Desktop\\C\u002B\u002BProjects\\MotionSim\\squareFunctions.cpp",
-              "RelativeDocumentMoniker": "squareFunctions.cpp",
-              "ToolTip": "C:\\Users\\elder\\OneDrive\\Desktop\\C\u002B\u002BProjects\\MotionSim\\squareFunctions.cpp",
-              "RelativeToolTip": "squareFunctions.cpp",
-              "ViewState": "AgIAAF8BAAAAAAAAAAAAAFQBAAAKAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-12-01T21:53:31.706Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 1,
               "Title": "squareFunction.h",
               "DocumentMoniker": "C:\\Users\\elder\\OneDrive\\Desktop\\C\u002B\u002BProjects\\MotionSim\\squareFunction.h",
               "RelativeDocumentMoniker": "squareFunction.h",
               "ToolTip": "C:\\Users\\elder\\OneDrive\\Desktop\\C\u002B\u002BProjects\\MotionSim\\squareFunction.h",
               "RelativeToolTip": "squareFunction.h",
-              "ViewState": "AgIAADoAAAAAAAAAAAAIwEoAAAAtAAAAAAAAAA==",
+              "ViewState": "AgIAADYAAAAAAAAAAAAAAEgAAABAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2025-12-01T21:53:11.761Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "squareFunctions.cpp",
+              "DocumentMoniker": "C:\\Users\\elder\\OneDrive\\Desktop\\C\u002B\u002BProjects\\MotionSim\\squareFunctions.cpp",
+              "RelativeDocumentMoniker": "squareFunctions.cpp",
+              "ToolTip": "C:\\Users\\elder\\OneDrive\\Desktop\\C\u002B\u002BProjects\\MotionSim\\squareFunctions.cpp",
+              "RelativeToolTip": "squareFunctions.cpp",
+              "ViewState": "AgIAACEBAAAAAAAAAAAAACsBAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-12-01T21:53:31.706Z",
               "EditorCaption": ""
             }
           ]

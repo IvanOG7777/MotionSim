@@ -229,9 +229,9 @@ int main() {
 		/*bool anyMovement = false;*/
 		/*updateAllSquares(squaresVector);*/
 
-		squaresInMotion(squaresVector, Gravity, deltaTime, e, mu);
 		/*collisionDetectionNestedLoop(squaresVector);*/
 		collisionDetectionSweepAndPrune(squaresVector);
+		/*SAP(squaresVector);*/
 	
 
 		glClear(GL_COLOR_BUFFER_BIT);
