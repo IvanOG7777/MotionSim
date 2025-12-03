@@ -58,17 +58,10 @@ public:
 
 void squaresInMotion(std::vector<Square>& squares);
 void computeEdges(Square& square);
-bool checkFloorSupport(Square& square);
+void computeEdgesVector(std::vector<Square>& squares);
 bool isPlatform(Square& square);
 bool squareCollides(Square& a, Square& b);
 void swapVelocities(Square& a, Square& b);
-void practicePlatform(Square& a, Square& b);
-bool horizontalOverlap(Square& a, Square& b);
-float getFloorSupportHeight(Square& square);
-float getPlatformSupportHeight(Square& falling, Square& platform);
-float findSupportHeightForSquare(Square& falling, std::vector<Square>& squares);
-void updateSqureWithPlatforms(Square& square, std::vector<Square>& squares);
-void updateAllSquares(std::vector<Square>& squares);
 bool isOnTop(Square& squareA, Square& squareB);
 void collisionDetectionNestedLoop(std::vector<Square>& squares);
 void collisionDetectionSweepAndPrune(std::vector<Square> &squares);

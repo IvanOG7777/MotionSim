@@ -92,18 +92,16 @@ void computeEdges(Square& square) {
 	square.right = square.pos.x + square.halfWidth;
 }
 
-// bool function to check if square is on the floor
-bool checkFloorSupport(Square& square) { // pass in reference of a square object
-	computeEdges(square); // computes its edges by calling the computeEdges fuction
-
-	// check if squares bottom is <= its own normalized ground coordinate AND the abs of its y velocity is < than 0.000f; 
-	if (square.bottom <= square.squaresGround && std::abs(square.vel.vy) < 0.0005f) {
-		// if conditions are true
-		//sets squares touching ground value to true
-		square.touchingGround = true;
+void computeEdgesVector(std::vector<Square>& squares) {
+	for (auto& square : squares) {
+		square.squaresGround = GLOBAL_FLOOR + square.pointSize / WINDOW_HEIGHT;
+		square.halfWidth = square.pointSize / WINDOW_WIDTH;
+		square.halfHeight = square.pointSize / WINDOW_HEIGHT;
+		square.top = square.pos.y + square.halfHeight;
+		square.bottom = square.pos.y - square.halfHeight;
+		square.left = square.pos.x - square.halfWidth;
+		square.right = square.pos.x + square.halfWidth;
 	}
-	// initally set to false so it will return false or true;
-	return square.touchingGround;
 }
 
 // bool function to check if square can be considerd a platfrom
@@ -121,6 +119,8 @@ bool isPlatform(Square& square) {
 // TODO: Square collides with another square IF its NOT WORLD WALL or WORLD BOTTOM/TOP
 // This logically will mean that if it hits anything that isnt a WORLD boundry it has to be another square
 bool squareCollides(Square& a, Square& b) {
+	computeEdges(a);
+	computeEdges(b);
 
 	// gets the center of both squares. Since both have pointSize of 15 units this is fine for now
 	// will not work if one or the other has a different point size
@@ -144,114 +144,14 @@ bool squareCollides(Square& a, Square& b) {
 }
 
 void swapVelocities(Square& a, Square& b) {
+	computeEdges(a);
+	computeEdges(b);
 	float tempVelX = a.vel.vx;
 	float tempVelY = a.vel.vy;
 	a.vel.vx = b.vel.vx;
 	a.vel.vy = b.vel.vy;
 	b.vel.vx = tempVelX;
 	b.vel.vy = tempVelY;
-}
-
-// function to use one square as a platform
-// here we are assuming that square b has alreay stopped moving in the y direction
-// and that a is still falling on top of it
-void practicePlatform(Square& a, Square& b) { // pass in two square objects
-	computeEdges(b); // compute the edge of square we want as platform (hard coding it for now)
-
-	float halfHeightFalling = a.pointSize / WINDOW_HEIGHT; // calculate the half height of the fall square a
-	float centerY = b.top + halfHeightFalling; // centerY is essentially the new calculated floor for that square
-
-	a.pos.y = centerY; //set a.pos.y to the newly calculated bottom
-	a.vel.vy = 0.0f; // stop moving the objects y velocity
-	a.yMotion = false; // sets a.yMotion to false to indicated we arent moving inthe y direction anymore
-
-	if (std::abs(a.vel.vx) < 0.001f) {
-		a.xMotion = false;
-	}
-}
-
-bool horizontalOverlap(Square& a, Square& b) {
-	computeEdges(a);
-	computeEdges(b);
-	bool overLapping = false;
-	if (a.left < b.right && b.left < a.right) {
-		overLapping = true;
-	}
-
-	return overLapping;
-}
-
-float getFloorSupportHeight(Square& square) {
-	float halfHeight = square.pointSize / WINDOW_HEIGHT;
-	return halfHeight + GLOBAL_FLOOR;
-}
-
-float getPlatformSupportHeight(Square& falling, Square& platform) {
-	computeEdges(platform);
-
-	float halfHeightFalling = falling.pointSize / WINDOW_HEIGHT;
-
-	return platform.top + halfHeightFalling;
-}
-
-float findSupportHeightForSquare(Square& falling, std::vector<Square>& squares) {
-	float bestSupport = getFloorSupportHeight(falling);
-
-	for (auto& squareP : squares) {
-
-		if (&squareP == &falling) { // still falling ignore this one since it can be a platform
-			continue;
-		}
-
-		if (!isPlatform(squareP)) {
-			continue;
-		}
-
-		if (!horizontalOverlap(falling, squareP)) {
-			continue;
-		}
-
-		computeEdges(falling);
-		computeEdges(squareP);
-
-		if (squareP.top > falling.pos.y) {
-			continue;
-		}
-
-		Square& platform = squareP;
-		computeEdges(platform);
-		if (platform.top > falling.pos.y) continue;
-
-		float cannidate = getPlatformSupportHeight(falling, platform);
-
-		if (cannidate <= falling.pos.y && cannidate > bestSupport) {
-			bestSupport = cannidate;
-		}
-	}
-
-	return bestSupport;
-}
-
-void updateSqureWithPlatforms(Square& square, std::vector<Square>& squares) {
-	square.vel.vy = square.vel.vy - Gravity * deltaTime;
-	square.pos.y = square.pos.y + square.vel.vy * deltaTime;
-	square.pos.x = square.pos.x + square.vel.vx * deltaTime;
-
-	float supportHeight = findSupportHeightForSquare(square, squares);
-
-	if (square.pos.y < supportHeight && square.vel.vy < 0) {
-		square.pos.y = supportHeight;
-		square.vel.vy = 0.0f;
-		square.yMotion = false;
-	}
-
-	computeEdges(square);
-}
-
-void updateAllSquares(std::vector<Square>& squares) {
-	for (auto& square : squares) {
-		updateSqureWithPlatforms(square, squares);
-	}
 }
 
 bool isOnTop(Square& squareA, Square& squareB) {
@@ -299,45 +199,60 @@ void collisionDetectionSweepAndPrune(std::vector<Square> &squares) {
 	for (int i = 0; i < squares.size(); i++) {
 		sorted.push_back(i);
 	}
-	
+	computeEdgesVector(squares);
+	// call sort once on sorted
+	// std:: sort is in charge of all sorting. It will traverse the vector swapping values if lambda says so
 	std::sort(sorted.begin(), sorted.end(),
-		[&](int a, int b) {
-			return squares[a].left < squares[b].left;
+		[&](int a, int b) { // pass 2 indices from sorted into lamda fucntion. Lamda function is the judge that says yes or no to swapping values
+			return squares[a].left < squares[b].left; // checks square withn squares at index a and b and compare .left return either true or false
+			// if condition is true say yes or no to swapping
+			//continue this until full sorted
 		}
 	);
+	// NOTE: Sorting with std:: sort isnt dont in any particular order, 
 
-	std::vector<int> active;
-	std::vector<std::pair<int, int>> candidatePairs;
+	std::vector<int> active; // holds active indices that may collide with others
+	std::vector<std::pair<int, int>> candidatePairs; // will hold vector of pairs of canidates close to eachother
+
+	// loop through sorted indices
 	for (auto indexCurrent : sorted) {
-		Square& current = squares[indexCurrent];
+		Square& current = squares[indexCurrent]; // create current square at current index from sorted
+		computeEdges(current);
 
-		int k = 0;
-
+		int k = 0; // k itterator
+		// on inital call we wont enter this becasue there isnt anything in active since active.size() = 0
+		// while k < active.size()
 		while (k < active.size()) {
-			Square& other = squares[active[k]];
-
-			if (other.right < current.left) {
-				active.erase(active.begin() + k);
+			Square& other = squares[active[k]]; // create another currentSquare but this time at original index from squares vector
+			computeEdges(other);
+			// moving from lef to right
+			if (other.right < current.left) { // if other.right value is less than current.left
+				// essentially saying if the other square is all the way to the left of current square
+				active.erase(active.begin() + k); // delete other from active
 			}
-			else {
+			else { // else move to next other
 				++k;
 			}
-		}
+		} // NOTE: Will only remove from active if other is completly to the left of current
 
+		// now we loop through the active indices
 		for (auto indexOther : active) {
-			int i = indexOther;
-			int j = indexCurrent;
-			if (i > j) std::swap(i, j);
-			candidatePairs.emplace_back(i, j);
+			int i = indexOther; // i is equal to current index in active
+			int j = indexCurrent; // j is equal to curernt index within sorted
+			if (i > j) std::swap(i, j); // prevent same comparision of objects, essentailly checking if i isnt j
+			candidatePairs.emplace_back(i, j); // pass those indices into a pair then into the vector of pairs
 			
 		}
 
-		std::sort(candidatePairs.begin(), candidatePairs.end());
+		std::sort(candidatePairs.begin(), candidatePairs.end()); // sort the pairs
 
+		// At this point we have pairs that are colliding,
 		for (auto pair : candidatePairs) {
+			// grab the indices within current pair and preform collision test or swapping velocites on them
 			int i = pair.first;
 			int j = pair.second;
 			if (squareCollides(squares[i], squares[j])) {
+				std::cout << "(" << i << "," << j << ")" << std::endl;
 				if (isPlatform(squares[j]) && isOnTop(squares[i], squares[j])) {
 					squares[i].pos.y = squares[j].top + squares[i].halfHeight;
 					squares[i].vel.vy = 0.0f;
@@ -355,7 +270,7 @@ void collisionDetectionSweepAndPrune(std::vector<Square> &squares) {
 				}
 			}
 		}
-
-		active.push_back(indexCurrent);
+		active.push_back(indexCurrent); // push indexCurrent into active
+		candidatePairs.clear();
 	}
 }
