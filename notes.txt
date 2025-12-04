@@ -5,3 +5,8 @@ Things to add:
 	1: Add a proper timer step.
 	2: Add mass to squares and adjust thier velocities properly with mass inclucde
 	3: Add a friction and restitution into the solver
+
+
+
+TODO FIXES:
+	I think x and y velocites keep running on some conditions so maybe something to subtract a small bit from velocity until its 0.

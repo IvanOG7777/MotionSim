@@ -5,28 +5,71 @@
 #include <algorithm>
 #include <iostream>
 
-bool runningSquares(std::vector<Square>& squares) {
-	bool isRunning = false;
+// function to check is all squares are still in motion
+bool runningSquares(std::vector<Square>& squares) { // pass in vector of squares
+	bool isRunning = false; // isRunning intial state is false
 
+	// loop over all squares
 	for (auto& square : squares) {
-		if (square.motionValues.inMotion == true) {
-			isRunning = true;
-			break;
+		if (square.motionValues.inMotion == true) { // check if current square is still in motion
+			isRunning = true; // make running true
+			break; // break out and move to next square
 		}
 	}
-	return isRunning;
+	return isRunning; // return isRunning true or false
 }
 
-void keepInBounds(Square& square, bool isHorizontal) {
-	computeEdges(square);
+void computeEdges(Square& square) {
+	// for now we will only use bottom to check if its on the floor,
+	// after will most likey change the function to allow objects to slide off its its past a boundry
+	// like if objects are stacked to high and the top object is "passing" the boundry we will be slided off
+	square.squaresGround = GLOBAL_FLOOR + square.pointSize / WINDOW_HEIGHT;
+	square.halfs.halfWidth = square.pointSize / WINDOW_WIDTH;
+	square.halfs.halfHeight = square.pointSize / WINDOW_HEIGHT;
+	square.edges.top = square.pos.y + square.halfs.halfHeight;
+	square.edges.bottom = square.pos.y - square.halfs.halfHeight;
+	square.edges.left = square.pos.x - square.halfs.halfWidth;
+	square.edges.right = square.pos.x + square.halfs.halfWidth;
+	square.wall.rightWall = 1.0f + square.pointSize / WINDOW_WIDTH;
+	square.wall.leftWall = -1.0f + square.pointSize / WINDOW_WIDTH;
+	square.wall.topWall = 1.0f + square.pointSize / WINDOW_HEIGHT;
+	square.wall.bottomWall = -1.0f + square.pointSize / WINDOW_HEIGHT;
+}
 
+// Essentially the same function as above for for a vector of squares
+void computeEdgesVector(std::vector<Square>& squares) {
+	for (auto& square : squares) {
+		square.squaresGround = GLOBAL_FLOOR + square.pointSize / WINDOW_HEIGHT;
+		square.halfs.halfWidth = square.pointSize / WINDOW_WIDTH;
+		square.halfs.halfHeight = square.pointSize / WINDOW_HEIGHT;
+		square.edges.top = square.pos.y + square.halfs.halfHeight;
+		square.edges.bottom = square.pos.y - square.halfs.halfHeight;
+		square.edges.left = square.pos.x - square.halfs.halfWidth;
+		square.edges.right = square.pos.x + square.halfs.halfWidth;
+		square.wall.rightWall = 1.0f + square.pointSize / WINDOW_WIDTH;
+		square.wall.leftWall = -1.0f + square.pointSize / WINDOW_WIDTH;
+		square.wall.topWall = 1.0f + square.pointSize / WINDOW_HEIGHT;
+		square.wall.bottomWall = -1.0f + square.pointSize / WINDOW_HEIGHT;
+	}
+}
+
+// function to check if square is in bounds of the map
+void keepInBounds(Square& square, bool isHorizontal) { // pass in the square we are checking and if we are checking horizontal or vertical (bool)
+	computeEdges(square); // compute its egdes to get up to date values
+
+	// if isHorizontal is true, we are checking for left and right walls
 	if (isHorizontal) {
+		// compute squares left and right wall values.
+		// each square has it own boundies becasue of its point size, square A might not have the same wall values as square B
 		float wallLeft = -1.0f + square.halfs.halfWidth;
 		float wallRight = 1.0f - square.halfs.halfWidth;
+		// check if s.pos.x is greater than its wallRight value and if its x velocity is greater than 0, meaning we are still moving toawrds the wall
 		if (square.pos.x >= wallRight && square.vel.vx > 0) {
-			square.pos.x = wallRight;
-			square.vel.vx = -square.vel.vx * e;
+			square.pos.x = wallRight; // snap its x position to its wallRitght value
+			square.vel.vx = -square.vel.vx * e; // and reverse its velocity
 		}
+
+		// same thing but for left
 		if (square.pos.x <= wallLeft && square.vel.vx < 0) {
 			square.pos.x = wallLeft;
 			square.vel.vx = -square.vel.vx * e;
@@ -37,12 +80,13 @@ void keepInBounds(Square& square, bool isHorizontal) {
 		float wallTop = 1.0f - square.halfs.halfHeight;
 
 
-		// keep inside vertical bounds (top)
+		// check if s.pos.y is greater than its wallTop value and if its y velocity is greater than 0, meaning we are still moving toawrds the wall
 		if (square.pos.y >= wallTop && square.vel.vy > 0) {
-			square.pos.y = wallTop;
-			square.vel.vy = -square.vel.vy * e;
+			square.pos.y = wallTop; // snap its y position to its wallTop value
+			square.vel.vy = -square.vel.vy * e; // and reverse its velocity
 		}
 
+		// same thing but for bottom
 		if (square.pos.y <= wallBottom && square.vel.vy < 0) {
 			square.pos.y = wallBottom;
 			square.vel.vy = -square.vel.vy * e;
@@ -50,25 +94,30 @@ void keepInBounds(Square& square, bool isHorizontal) {
 	}
 }
 
-void squaresInMotion(std::vector<Square>& squares) {
 
+// function used to move each square individually with physics
+void squaresInMotion(std::vector<Square>& squares) { // pass in the vector of squares
+
+	// loop over each square within the vector
 	for (auto& square : squares) {
-		computeEdges(square);
+		computeEdges(square); // compute its edges and wall values first to have up to date values
 		float groundY = GLOBAL_FLOOR + square.pointSize / WINDOW_HEIGHT;
-		float wallRight = 1.0f + square.pointSize / WINDOW_WIDTH;
-		float wallLeft = -1.0f + square.pointSize / WINDOW_WIDTH;
-		float wallTop = 1.0f + square.pointSize / WINDOW_HEIGHT;
-		float wallBottom = -1.0f + square.pointSize / WINDOW_HEIGHT;
 		float accelerationFriction = mu * Gravity;
 		/*std::cout << square.name << " gound value: " << square.groundY << "\n";
 		std::cout << square.name << " y value: " << square.pos.y << "\n";
 		std::cout << "\n";*/
 
+		//check if square is currently in motion
 		if (square.motionValues.inMotion) {
+
+			// if it is recompute its velocity and x/y position
+			// I think this is where the issue persists of the red square phasing through the blue on initial start.
+			// secifically this line is causing the issue: square.vel.vy = square.vel.vy - Gravity * deltaTime; when delta time is too big
 			square.vel.vy = square.vel.vy - Gravity * deltaTime;
 			square.pos.x = square.pos.x + square.vel.vx * deltaTime;
 			square.pos.y += square.vel.vy * deltaTime;
 
+			// check squares y position is less than its ground ground value or the GLOBAL_FLOOR value (-1.0f)
 			if (square.pos.y <= groundY || square.pos.y <= GLOBAL_FLOOR) {
 				square.pos.y = groundY; // snap the pos.y to be the groundY
 
@@ -104,7 +153,7 @@ void squaresInMotion(std::vector<Square>& squares) {
 					}
 				}
 
-				if (std::abs(square.vel.vx) < 0.5f) {
+				if (std::abs(square.vel.vx) < 0.05f) {
 					square.vel.vx = 0.0f;
 					square.motionValues.xMotion = false;
 				}
@@ -117,34 +166,10 @@ void squaresInMotion(std::vector<Square>& squares) {
 			//if pos.x is greater than the right wall NDC 1.0f AND vel.vs is greater than 0
 
 			keepInBounds(square, true);
+			keepInBounds(square, false);
 
 			if (!square.motionValues.xMotion && !square.motionValues.yMotion) square.motionValues.inMotion = false;
 		}
-	}
-}
-
-void computeEdges(Square& square) {
-	// for now we will only use bottom to check if its on the floor,
-	// after will most likey change the function to allow objects to slide off its its past a boundry
-	// like if objects are stacked to high and the top object is "passing" the boundry we will be slided off
-	square.squaresGround = GLOBAL_FLOOR + square.pointSize / WINDOW_HEIGHT;
-	square.halfs.halfWidth = square.pointSize / WINDOW_WIDTH;
-	square.halfs.halfHeight = square.pointSize / WINDOW_HEIGHT;
-	square.edges.top = square.pos.y + square.halfs.halfHeight;
-	square.edges.bottom = square.pos.y - square.halfs.halfHeight;
-	square.edges.left = square.pos.x - square.halfs.halfWidth;
-	square.edges.right = square.pos.x + square.halfs.halfWidth;
-}
-
-void computeEdgesVector(std::vector<Square>& squares) {
-	for (auto& square : squares) {
-		square.squaresGround = GLOBAL_FLOOR + square.pointSize / WINDOW_HEIGHT;
-		square.halfs.halfWidth = square.pointSize / WINDOW_WIDTH;
-		square.halfs.halfHeight = square.pointSize / WINDOW_HEIGHT;
-		square.edges.top = square.pos.y + square.halfs.halfHeight;
-		square.edges.bottom = square.pos.y - square.halfs.halfHeight;
-		square.edges.left = square.pos.x - square.halfs.halfWidth;
-		square.edges.right = square.pos.x + square.halfs.halfWidth;
 	}
 }
 
