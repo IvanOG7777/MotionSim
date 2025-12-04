@@ -229,7 +229,7 @@ int main() {
 		
 		squaresInMotion(squaresVector);
 		collisionDetectionSweepAndPrune(squaresVector);
-		std::cout << "Within main loop: " << GLOBAL_FLOOR << std::endl;
+		/*std::cout << "Within main loop: " << GLOBAL_FLOOR << std::endl;*/
 
 		/*bool running = runningSquares(squaresVector);
 

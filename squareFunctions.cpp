@@ -27,9 +27,9 @@ void squaresInMotion(std::vector<Square>& squares) {
 		float wallTop = 1.0f + square.pointSize / WINDOW_HEIGHT;
 		float wallBottom = -1.0f + square.pointSize / WINDOW_HEIGHT;
 		float accelerationFriction = mu * Gravity;
-		std::cout << square.name << " gound value: " << square.groundY << std::endl;
-		std::cout << square.name << " y value: " << square.pos.y << std::endl;
-		std::cout << std::endl;
+		/*std::cout << square.name << " gound value: " << square.groundY << "\n";
+		std::cout << square.name << " y value: " << square.pos.y << "\n";
+		std::cout << "\n";*/
 
 		if (square.motionValues.inMotion) {
 			square.vel.vy = square.vel.vy - Gravity * deltaTime;
@@ -78,6 +78,8 @@ void squaresInMotion(std::vector<Square>& squares) {
 			}
 
 			//two if block to keep ball within the boundries
+
+			/*keepInBounds(square);*/
 
 			//if pos.x is greater than the right wall NDC 1.0f AND vel.vs is greater than 0
 			if (square.pos.x >= wallRight && square.vel.vx > 0) {
@@ -226,6 +228,7 @@ void collisionDetectionNestedLoop(std::vector<Square>& squares) {
 }
 
 void keepInBounds(Square& square) {
+	computeEdges(square);
 	float wallLeft = -1.0f + square.halfs.halfWidth;
 	float wallRight = 1.0f - square.halfs.halfWidth;
 	float wallBottom = -1.0f + square.halfs.halfHeight;
@@ -314,15 +317,17 @@ void collisionDetectionSweepAndPrune(std::vector<Square> &squares) {
 			Square& a = squares[i];
 			Square& b = squares[j];
 			if (squareCollides(squares[i], squares[j])) {
-				std::cout << "(" << i << "," << j << ")" << std::endl;
+				/*std::cout << "(" << i << "," << j << ")" << "\n";*/
 				if (isPlatform(squares[j]) && isOnTop(squares[i], squares[j])) {
 					squares[i].pos.y = squares[j].edges.top + squares[i].halfs.halfHeight;
+					squares[i].pos.y = squares[j].edges.top;
 					squares[i].vel.vy = 0.0f;
 					squares[i].motionValues.yMotion = false;
 					squares[i].motionValues.inMotion = false;
 				}
 				else if (isPlatform(squares[i]) && isOnTop(squares[j], squares[i])) {
 					squares[j].pos.y = squares[i].edges.top + squares[j].halfs.halfHeight;
+					squares[j].pos.y = squares[i].edges.top;
 					squares[j].vel.vy = 0.0f;
 					squares[j].motionValues.yMotion = false;
 					squares[j].motionValues.inMotion = false;
@@ -335,7 +340,7 @@ void collisionDetectionSweepAndPrune(std::vector<Square> &squares) {
 					// check if overlapX is less than overlapY
 					if (overlapX < overlapY) {
 
-						// this is for horizontal collison
+						// this is for HORIZONTAL collison
 						float correction = overlapX / 2; // calculate the correction of the shift
 
 						// if a is to the left of b
@@ -343,38 +348,136 @@ void collisionDetectionSweepAndPrune(std::vector<Square> &squares) {
 							// adjust thier x positions wiht correction
 							a.pos.x -= correction;
 							b.pos.x += correction;
+							
+							float wallRightA = 1.0f + a.pointSize / WINDOW_WIDTH;
+							float wallLeftA = -1.0f + a.pointSize / WINDOW_WIDTH;
+							float wallRightB = 1.0f + b.pointSize / WINDOW_WIDTH;
+							float wallLeftB = -1.0f + b.pointSize / WINDOW_WIDTH;
 
-							keepInBounds(a);
-							keepInBounds(b);
+							if (a.pos.x >= wallRightA && a.vel.vx > 0) {
+								a.pos.x = wallRightA; // snap the position of x to the right wall
+								a.vel.vx = -a.vel.vx * e; // invert the velocity backwards and reduce velocity a bit by e
+							}
+
+							//if pos.x is less than the left wall NDC -1.0f AND vel.vs is less than 0
+							if (a.pos.x <= wallLeftA && a.vel.vx < 0) {
+								a.pos.x = wallLeftA; // snap the position of x to the left wall
+								a.vel.vx = -a.vel.vx * e; // invert the velocity backwards and reduce velocity a bit by e
+							}
+
+							if (b.pos.x >= wallRightB && b.vel.vx > 0) {
+								b.pos.x = wallRightB; // snap the position of x to the right wall
+								b.vel.vx = -b.vel.vx * e; // invert the velocity backwards and reduce velocity a bit by e
+							}
+
+							//if pos.x is less than the left wall NDC -1.0f AND vel.vs is less than 0
+							if (b.pos.x <= wallLeftB && b.vel.vx < 0) {
+								b.pos.x = wallLeftB; // snap the position of x to the left wall
+								b.vel.vx = -b.vel.vx * e; // invert the velocity backwards and reduce velocity a bit by e
+							}
+
 						}
 						else { // if a is to the right of b
 							// adjust thier x positions wiht correction
 							a.pos.x += correction;
 							b.pos.x -= correction;
 
-							keepInBounds(a);
-							keepInBounds(b);
+							float wallRightA = 1.0f + a.pointSize / WINDOW_WIDTH;
+							float wallLeftA = -1.0f + a.pointSize / WINDOW_WIDTH;
+							float wallRightB = 1.0f + b.pointSize / WINDOW_WIDTH;
+							float wallLeftB = -1.0f + b.pointSize / WINDOW_WIDTH;
+
+							if (a.pos.x >= wallRightA && a.vel.vx > 0) {
+								a.pos.x = wallRightA; // snap the position of x to the right wall
+								a.vel.vx = -a.vel.vx * e; // invert the velocity backwards and reduce velocity a bit by e
+							}
+
+							//if pos.x is less than the left wall NDC -1.0f AND vel.vs is less than 0
+							if (a.pos.x <= wallLeftA && a.vel.vx < 0) {
+								a.pos.x = wallLeftA; // snap the position of x to the left wall
+								a.vel.vx = -a.vel.vx * e; // invert the velocity backwards and reduce velocity a bit by e
+							}
+
+							if (b.pos.x >= wallRightB && b.vel.vx > 0) {
+								b.pos.x = wallRightB; // snap the position of x to the right wall
+								b.vel.vx = -b.vel.vx * e; // invert the velocity backwards and reduce velocity a bit by e
+							}
+
+							//if pos.x is less than the left wall NDC -1.0f AND vel.vs is less than 0
+							if (b.pos.x <= wallLeftB && b.vel.vx < 0) {
+								b.pos.x = wallLeftB; // snap the position of x to the left wall
+								b.vel.vx = -b.vel.vx * e; // invert the velocity backwards and reduce velocity a bit by e
+							}
 						}
 						// finally swap thier velocites
 						/*swapVelocities(a, b);*/
 						swapVelocities(a, b, true, false);
 					}
 					else {
-						// this is for vertical collison
+						// this is for VERTICAL collison
 						float correction = overlapY / 2;
 						if (a.pos.y < b.pos.y) {
 							a.pos.y -= correction;
 							b.pos.y += correction;
 
-							keepInBounds(a);
-							keepInBounds(b);
+							float wallTopA = 1.0f + a.pointSize / WINDOW_HEIGHT;
+							float wallBottomA = -1.0f + a.pointSize / WINDOW_HEIGHT;
+							float wallTopB = 1.0f + b.pointSize / WINDOW_HEIGHT;
+							float wallBottomB = -1.0f + b.pointSize / WINDOW_HEIGHT;
+
+							if (a.pos.y >= wallTopA && a.vel.vy > 0) {
+								a.pos.y = wallTopA; // snap the position of x to the right wall
+								a.vel.vy = -a.vel.vy * e; // invert the velocity backwards and reduce velocity a bit by e
+							}
+
+							//if pos.x is less than the left wall NDC -1.0f AND vel.vs is less than 0
+							if (a.pos.y <= wallBottomA && a.vel.vy < 0) {
+								a.pos.y = wallBottomA; // snap the position of x to the left wall
+								a.vel.vy = -a.vel.vy * e; // invert the velocity backwards and reduce velocity a bit by e
+							}
+
+							if (b.pos.y >= wallTopB && b.vel.vy > 0) {
+								b.pos.y = wallTopB; // snap the position of x to the right wall
+								b.vel.vy = -b.vel.vy * e; // invert the velocity backwards and reduce velocity a bit by e
+							}
+
+							//if pos.x is less than the left wall NDC -1.0f AND vel.vs is less than 0
+							if (b.pos.y <= wallBottomB && b.vel.vy < 0) {
+								b.pos.y = wallBottomB; // snap the position of x to the left wall
+								b.vel.vy = -b.vel.vy * e; // invert the velocity backwards and reduce velocity a bit by e
+							}
+
 						}
 						else {
 							a.pos.y += correction;
 							b.pos.y -= correction;
 
-							keepInBounds(a);
-							keepInBounds(b);
+							float wallTopA = 1.0f + a.pointSize / WINDOW_HEIGHT;
+							float wallBottomA = -1.0f + a.pointSize / WINDOW_HEIGHT;
+							float wallTopB = 1.0f + b.pointSize / WINDOW_HEIGHT;
+							float wallBottomB = -1.0f + b.pointSize / WINDOW_HEIGHT;
+
+							if (a.pos.y >= wallTopA && a.vel.vy > 0) {
+								a.pos.y = wallTopA; // snap the position of x to the right wall
+								a.vel.vy = -a.vel.vy * e; // invert the velocity backwards and reduce velocity a bit by e
+							}
+
+							//if pos.x is less than the left wall NDC -1.0f AND vel.vs is less than 0
+							if (a.pos.y <= wallBottomA && a.vel.vy < 0) {
+								a.pos.y = wallBottomA; // snap the position of x to the left wall
+								a.vel.vy = -a.vel.vy * e; // invert the velocity backwards and reduce velocity a bit by e
+							}
+
+							if (b.pos.y >= wallTopB && b.vel.vy > 0) {
+								b.pos.y = wallTopB; // snap the position of x to the right wall
+								b.vel.vy = -b.vel.vy * e; // invert the velocity backwards and reduce velocity a bit by e
+							}
+
+							//if pos.x is less than the left wall NDC -1.0f AND vel.vs is less than 0
+							if (b.pos.y <= wallBottomB && b.vel.vy < 0) {
+								b.pos.y = wallBottomB; // snap the position of x to the left wall
+								b.vel.vy = -b.vel.vy * e; // invert the velocity backwards and reduce velocity a bit by e
+							}
 						}
 
 						/*swapVelocities(a, b);*/

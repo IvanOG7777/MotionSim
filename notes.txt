@@ -1,0 +1,7 @@
+What ive doen is essentially a mini physics simulator for 2d boxes. Might as well finish it properly
+
+
+Things to add:
+	1: Add a proper timer step.
+	2: Add mass to squares and adjust thier velocities properly with mass inclucde
+	3: Add a friction and restitution into the solver
