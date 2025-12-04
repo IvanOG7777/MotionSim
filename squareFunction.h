@@ -61,5 +61,5 @@ bool squareCollides(Square& a, Square& b);
 void swapVelocities(Square& a, Square& b, bool xAxisChange, bool yAxisChange);
 bool isOnTop(Square& squareA, Square& squareB);
 void collisionDetectionNestedLoop(std::vector<Square>& squares);
-void keepInBounds(Square& square);
+void keepInBounds(Square& square, bool isHorizontal);
 void collisionDetectionSweepAndPrune(std::vector<Square> &squares);
