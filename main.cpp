@@ -226,12 +226,17 @@ int main() {
 	GLint uPointSizeLocD = glGetUniformLocation(programD, "uPointSize");
 
 	while (!glfwWindowShouldClose(window)) {
-		/*bool anyMovement = false;*/
-		/*updateAllSquares(squaresVector);*/
-
-		/*collisionDetectionNestedLoop(squaresVector);*/
+		
 		squaresInMotion(squaresVector);
 		collisionDetectionSweepAndPrune(squaresVector);
+		std::cout << "Within main loop: " << GLOBAL_FLOOR << std::endl;
+
+		/*bool running = runningSquares(squaresVector);
+
+		if (running == false) {
+			glfwTerminate();
+			return 0;
+		}*/
 	
 
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -256,14 +261,14 @@ int main() {
 			}
 
 			if (i == 2) {
-				// squareB
+				// squareC
 				glUseProgram(programC);
 				glUniform2f(uPositionLocC, square.pos.x, square.pos.y);
 				glUniform1f(uPointSizeLocC, square.pointSize);
 			}
 
 			if (i == 3) {
-				// squareB
+				// squareD
 				glUseProgram(programD);
 				glUniform2f(uPositionLocD, square.pos.x, square.pos.y);
 				glUniform1f(uPointSizeLocD, square.pointSize);

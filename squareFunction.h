@@ -33,35 +33,33 @@ struct MotionValues {
 	bool inMotion = true;
 };
 
+struct Halfs {
+	float halfWidth;
+	float halfHeight;
+};
+
 class Square {
 public:
 	Position pos;
 	Velocity vel;
+	Wall wall;
+	Edges edges;
+	MotionValues motionValues;
+	Halfs halfs;
 	float pointSize;
-	bool yMotion = true;
-	bool xMotion = true;
-	bool inMotion = true;
 	bool touchingGround = false;
 	float groundY;
-	float wallRight;
-	float wallLeft;
-	float mass;
 	float squaresGround;
-	float halfWidth;
-	float halfHeight;
-	float top;
-	float bottom;
-	float left;
-	float right;
 	std::string name;
 };
-
+bool runningSquares(std::vector<Square>& squares);
 void squaresInMotion(std::vector<Square>& squares);
 void computeEdges(Square& square);
 void computeEdgesVector(std::vector<Square>& squares);
 bool isPlatform(Square& square);
 bool squareCollides(Square& a, Square& b);
-void swapVelocities(Square& a, Square& b);
+void swapVelocities(Square& a, Square& b, bool xAxisChange, bool yAxisChange);
 bool isOnTop(Square& squareA, Square& squareB);
 void collisionDetectionNestedLoop(std::vector<Square>& squares);
+void keepInBounds(Square& square);
 void collisionDetectionSweepAndPrune(std::vector<Square> &squares);

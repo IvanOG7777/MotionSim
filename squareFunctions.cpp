@@ -5,6 +5,18 @@
 #include <algorithm>
 #include <iostream>
 
+bool runningSquares(std::vector<Square>& squares) {
+	bool isRunning = false;
+
+	for (auto& square : squares) {
+		if (square.motionValues.inMotion == true) {
+			isRunning = true;
+			break;
+		}
+	}
+	return isRunning;
+}
+
 void squaresInMotion(std::vector<Square>& squares) {
 
 	for (auto& square : squares) {
@@ -12,14 +24,19 @@ void squaresInMotion(std::vector<Square>& squares) {
 		float groundY = GLOBAL_FLOOR + square.pointSize / WINDOW_HEIGHT;
 		float wallRight = 1.0f + square.pointSize / WINDOW_WIDTH;
 		float wallLeft = -1.0f + square.pointSize / WINDOW_WIDTH;
+		float wallTop = 1.0f + square.pointSize / WINDOW_HEIGHT;
+		float wallBottom = -1.0f + square.pointSize / WINDOW_HEIGHT;
 		float accelerationFriction = mu * Gravity;
+		std::cout << square.name << " gound value: " << square.groundY << std::endl;
+		std::cout << square.name << " y value: " << square.pos.y << std::endl;
+		std::cout << std::endl;
 
-		if (square.inMotion) {
+		if (square.motionValues.inMotion) {
 			square.vel.vy = square.vel.vy - Gravity * deltaTime;
 			square.pos.x = square.pos.x + square.vel.vx * deltaTime;
 			square.pos.y += square.vel.vy * deltaTime;
 
-			if (square.pos.y <= groundY) {
+			if (square.pos.y <= groundY || square.pos.y <= GLOBAL_FLOOR) {
 				square.pos.y = groundY; // snap the pos.y to be the groundY
 
 				//check if vel.vy is negative meaning its falling
@@ -33,7 +50,7 @@ void squaresInMotion(std::vector<Square>& squares) {
 					if (std::abs(square.vel.vy) < 0.05f) {
 						square.vel.vy = 0.0f; // make velocity 0
 						square.pos.y = groundY;
-						square.yMotion = false;
+						square.motionValues.yMotion = false;
 					}
 				}
 			}
@@ -56,7 +73,7 @@ void squaresInMotion(std::vector<Square>& squares) {
 
 				if (std::abs(square.vel.vx) < 0.5f) {
 					square.vel.vx = 0.0f;
-					square.xMotion = false;
+					square.motionValues.xMotion = false;
 				}
 			}
 
@@ -74,7 +91,7 @@ void squaresInMotion(std::vector<Square>& squares) {
 				square.vel.vx = -square.vel.vx * e; // invert the velocity backwards and reduce velocity a bit by e
 			}
 
-			if (!square.xMotion && !square.yMotion) square.inMotion = false;
+			if (!square.motionValues.xMotion && !square.motionValues.yMotion) square.motionValues.inMotion = false;
 		}
 	}
 }
@@ -84,23 +101,23 @@ void computeEdges(Square& square) {
 	// after will most likey change the function to allow objects to slide off its its past a boundry
 	// like if objects are stacked to high and the top object is "passing" the boundry we will be slided off
 	square.squaresGround = GLOBAL_FLOOR + square.pointSize / WINDOW_HEIGHT;
-	square.halfWidth = square.pointSize / WINDOW_WIDTH;
-	square.halfHeight = square.pointSize / WINDOW_HEIGHT;
-	square.top = square.pos.y + square.halfHeight;
-	square.bottom = square.pos.y - square.halfHeight;
-	square.left = square.pos.x - square.halfWidth;
-	square.right = square.pos.x + square.halfWidth;
+	square.halfs.halfWidth = square.pointSize / WINDOW_WIDTH;
+	square.halfs.halfHeight = square.pointSize / WINDOW_HEIGHT;
+	square.edges.top = square.pos.y + square.halfs.halfHeight;
+	square.edges.bottom = square.pos.y - square.halfs.halfHeight;
+	square.edges.left = square.pos.x - square.halfs.halfWidth;
+	square.edges.right = square.pos.x + square.halfs.halfWidth;
 }
 
 void computeEdgesVector(std::vector<Square>& squares) {
 	for (auto& square : squares) {
 		square.squaresGround = GLOBAL_FLOOR + square.pointSize / WINDOW_HEIGHT;
-		square.halfWidth = square.pointSize / WINDOW_WIDTH;
-		square.halfHeight = square.pointSize / WINDOW_HEIGHT;
-		square.top = square.pos.y + square.halfHeight;
-		square.bottom = square.pos.y - square.halfHeight;
-		square.left = square.pos.x - square.halfWidth;
-		square.right = square.pos.x + square.halfWidth;
+		square.halfs.halfWidth = square.pointSize / WINDOW_WIDTH;
+		square.halfs.halfHeight = square.pointSize / WINDOW_HEIGHT;
+		square.edges.top = square.pos.y + square.halfs.halfHeight;
+		square.edges.bottom = square.pos.y - square.halfs.halfHeight;
+		square.edges.left = square.pos.x - square.halfs.halfWidth;
+		square.edges.right = square.pos.x + square.halfs.halfWidth;
 	}
 }
 
@@ -124,10 +141,10 @@ bool squareCollides(Square& a, Square& b) {
 
 	// gets the center of both squares. Since both have pointSize of 15 units this is fine for now
 	// will not work if one or the other has a different point size
-	float halfWidthA = a.pointSize / WINDOW_WIDTH;
-	float halfHeightA = a.pointSize / WINDOW_HEIGHT;
-	float halfWidthB = b.pointSize / WINDOW_WIDTH;
-	float halfHeightB = b.pointSize / WINDOW_HEIGHT;
+	float halfWidthA = a.halfs.halfWidth;
+	float halfHeightA = a.halfs.halfHeight;
+	float halfWidthB = b.halfs.halfWidth;
+	float halfHeightB = b.halfs.halfHeight;
 	float halfWidthSum = halfWidthA + halfWidthB;
 	float halfHeightSum = halfHeightA+ halfHeightB;
 
@@ -143,15 +160,31 @@ bool squareCollides(Square& a, Square& b) {
 	return dx < halfWidthSum && dy < halfHeightSum;
 }
 
-void swapVelocities(Square& a, Square& b) {
+void swapVelocities(Square& a, Square& b, bool xAxisChange, bool yAxisChange) {
 	computeEdges(a);
 	computeEdges(b);
-	float tempVelX = a.vel.vx;
-	float tempVelY = a.vel.vy;
-	a.vel.vx = b.vel.vx;
-	a.vel.vy = b.vel.vy;
-	b.vel.vx = tempVelX;
-	b.vel.vy = tempVelY;
+	if (xAxisChange == true && yAxisChange == false) {
+		float tempVelX = a.vel.vx;
+
+		a.vel.vx = b.vel.vx;
+		b.vel.vx = tempVelX;
+	}
+	else if (xAxisChange == false && yAxisChange == true) {
+		float tempVelY = a.vel.vy;
+		a.vel.vy = b.vel.vy;
+		b.vel.vy = tempVelY;
+	}
+	else if (xAxisChange == true && yAxisChange == true) {
+		float tempVelX = a.vel.vx;
+		float tempVelY = a.vel.vy;
+		a.vel.vx = b.vel.vx;
+		a.vel.vy = b.vel.vy;
+		b.vel.vx = tempVelX;
+		b.vel.vy = tempVelY;
+	}
+	else {
+		return;
+	}
 }
 
 bool isOnTop(Square& squareA, Square& squareB) {
@@ -160,9 +193,9 @@ bool isOnTop(Square& squareA, Square& squareB) {
 	computeEdges(squareB);
 
 	// test to see if the bottom square, square a
-	bool verticalTouch = std::abs(squareA.bottom - squareB.top) < 0.005f;
+	bool verticalTouch = std::abs(squareA.edges.bottom - squareB.edges.top) < 0.005f;
 	bool horizontalOverlap =
-		(squareA.right > squareB.left) && (squareA.left < squareB.right);
+		(squareA.edges.right > squareB.edges.left) && (squareA.edges.left < squareB.edges.right);
 	bool fallingOrResting = squareA.vel.vy <= 0.0f;
 
 	return verticalTouch && horizontalOverlap && fallingOrResting;
@@ -173,22 +206,49 @@ void collisionDetectionNestedLoop(std::vector<Square>& squares) {
 		for (int j = i + 1; j < squares.size(); j++) {
 			if (squareCollides(squares[i], squares[j])) {
 				if (isPlatform(squares[j]) && isOnTop(squares[i], squares[j])) {
-					squares[i].pos.y = squares[j].top + squares[i].halfHeight;
+					squares[i].pos.y = squares[j].edges.top + squares[i].halfs.halfHeight;
 					squares[i].vel.vy = 0.0f;
-					squares[i].yMotion = false;
-					squares[i].inMotion = false;
+					squares[i].motionValues.yMotion = false;
+					squares[i].motionValues.inMotion = false;
 				}
 				else if (isPlatform(squares[i]) && isOnTop(squares[j], squares[i])) {
-					squares[j].pos.y = squares[i].top + squares[j].halfHeight;
+					squares[j].pos.y = squares[i].edges.top + squares[j].halfs.halfHeight;
 					squares[j].vel.vy = 0.0f;
-					squares[j].yMotion = false;
-					squares[j].inMotion = false;
+					squares[j].motionValues.yMotion = false;
+					squares[j].motionValues.inMotion = false;
 				}
 				else {
-					swapVelocities(squares[i], squares[j]);
+					swapVelocities(squares[i], squares[j], true, true);
 				}
 			}
 		}
+	}
+}
+
+void keepInBounds(Square& square) {
+	float wallLeft = -1.0f + square.halfs.halfWidth;
+	float wallRight = 1.0f - square.halfs.halfWidth;
+	float wallBottom = -1.0f + square.halfs.halfHeight;
+	float wallTop = 1.0f - square.halfs.halfHeight;
+
+	if (square.pos.x >= wallRight && square.vel.vx > 0) {
+		square.pos.x = wallRight;
+		square.vel.vx = -square.vel.vx * e;
+	}
+	if (square.pos.x <= wallLeft && square.vel.vx < 0) {
+		square.pos.x = wallLeft;
+		square.vel.vx = -square.vel.vx * e;
+	}
+
+	// keep inside vertical bounds (top)
+	if (square.pos.y >= wallTop && square.vel.vy > 0) {
+		square.pos.y = wallTop;
+		square.vel.vy = -square.vel.vy * e;
+	}
+
+	if (square.pos.y <= wallBottom && square.vel.vy > 0) {
+		square.pos.y = wallBottom;
+		square.vel.vy = -square.vel.vy * e;
 	}
 }
 
@@ -204,7 +264,7 @@ void collisionDetectionSweepAndPrune(std::vector<Square> &squares) {
 	// std:: sort is in charge of all sorting. It will traverse the vector swapping values if lambda says so
 	std::sort(sorted.begin(), sorted.end(),
 		[&](int a, int b) { // pass 2 indices from sorted into lamda fucntion. Lamda function is the judge that says yes or no to swapping values
-			return squares[a].left < squares[b].left; // checks square withn squares at index a and b and compare .left return either true or false
+			return squares[a].edges.left < squares[b].edges.left; // checks square withn squares at index a and b and compare .left return either true or false
 			// if condition is true say yes or no to swapping
 			//continue this until full sorted
 		}
@@ -226,7 +286,7 @@ void collisionDetectionSweepAndPrune(std::vector<Square> &squares) {
 			Square& other = squares[active[k]]; // create another currentSquare but this time at original index from squares vector
 			computeEdges(other);
 			// moving from lef to right
-			if (other.right < current.left) { // if other.right value is less than current.left
+			if (other.edges.right < current.edges.left) { // if other.right value is less than current.left
 				// essentially saying if the other square is all the way to the left of current square
 				active.erase(active.begin() + k); // delete other from active
 			}
@@ -251,26 +311,79 @@ void collisionDetectionSweepAndPrune(std::vector<Square> &squares) {
 			// grab the indices within current pair and preform collision test or swapping velocites on them
 			int i = pair.first;
 			int j = pair.second;
+			Square& a = squares[i];
+			Square& b = squares[j];
 			if (squareCollides(squares[i], squares[j])) {
 				std::cout << "(" << i << "," << j << ")" << std::endl;
 				if (isPlatform(squares[j]) && isOnTop(squares[i], squares[j])) {
-					squares[i].pos.y = squares[j].top + squares[i].halfHeight;
+					squares[i].pos.y = squares[j].edges.top + squares[i].halfs.halfHeight;
 					squares[i].vel.vy = 0.0f;
-					squares[i].yMotion = false;
-					squares[i].inMotion = false;
+					squares[i].motionValues.yMotion = false;
+					squares[i].motionValues.inMotion = false;
 				}
 				else if (isPlatform(squares[i]) && isOnTop(squares[j], squares[i])) {
-					squares[j].pos.y = squares[i].top + squares[j].halfHeight;
+					squares[j].pos.y = squares[i].edges.top + squares[j].halfs.halfHeight;
 					squares[j].vel.vy = 0.0f;
-					squares[j].yMotion = false;
-					squares[j].inMotion = false;
+					squares[j].motionValues.yMotion = false;
+					squares[j].motionValues.inMotion = false;
 				}
 				else {
-					swapVelocities(squares[i], squares[j]);
+					// will calculate the amount of distance the squares are overlapping in both the x and y axis
+					float overlapX = std::min(a.edges.right, b.edges.right) - std::max(a.edges.left, b.edges.left);
+					float overlapY = std::min(a.edges.top, b.edges.top) - std::max(a.edges.bottom, b.edges.bottom);
+
+					// check if overlapX is less than overlapY
+					if (overlapX < overlapY) {
+
+						// this is for horizontal collison
+						float correction = overlapX / 2; // calculate the correction of the shift
+
+						// if a is to the left of b
+						if (a.pos.x < b.pos.x) {
+							// adjust thier x positions wiht correction
+							a.pos.x -= correction;
+							b.pos.x += correction;
+
+							keepInBounds(a);
+							keepInBounds(b);
+						}
+						else { // if a is to the right of b
+							// adjust thier x positions wiht correction
+							a.pos.x += correction;
+							b.pos.x -= correction;
+
+							keepInBounds(a);
+							keepInBounds(b);
+						}
+						// finally swap thier velocites
+						/*swapVelocities(a, b);*/
+						swapVelocities(a, b, true, false);
+					}
+					else {
+						// this is for vertical collison
+						float correction = overlapY / 2;
+						if (a.pos.y < b.pos.y) {
+							a.pos.y -= correction;
+							b.pos.y += correction;
+
+							keepInBounds(a);
+							keepInBounds(b);
+						}
+						else {
+							a.pos.y += correction;
+							b.pos.y -= correction;
+
+							keepInBounds(a);
+							keepInBounds(b);
+						}
+
+						/*swapVelocities(a, b);*/
+						swapVelocities(a, b, false, true);
+					}
 				}
 			}
 		}
 		active.push_back(indexCurrent); // push indexCurrent into active
-		candidatePairs.clear();
+		candidatePairs.clear(); // clear the canidate pairs to have fresh pair on next itteration.
 	}
 }
