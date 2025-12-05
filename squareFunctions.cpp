@@ -109,7 +109,7 @@ void squaresInMotion(std::vector<Square>& squares) { // pass in the vector of sq
 
 		//check if square is currently in motion
 		if (square.motionValues.inMotion) {
-
+			std::cout << "We are in the motion block calculating physics" << "\n";
 			// if it is recompute its velocity and x/y position
 			// I think this is where the issue persists of the red square phasing through the blue on initial start.
 			// secifically this line is causing the issue: square.vel.vy = square.vel.vy - Gravity * deltaTime; when delta time is too big
@@ -118,18 +118,19 @@ void squaresInMotion(std::vector<Square>& squares) { // pass in the vector of sq
 			square.pos.y += square.vel.vy * deltaTime;
 
 			// check squares y position is less than its ground ground value or the GLOBAL_FLOOR value (-1.0f)
-			if (square.pos.y <= groundY || square.pos.y <= GLOBAL_FLOOR) {
+			if (square.pos.y <= groundY) {
+				std::cout << "We are in the pos.y is less than groundy and pos.y is less than GLOABL_FLOOR Block" << "\n";
 				square.pos.y = groundY; // snap the pos.y to be the groundY
 
 				//check if vel.vy is negative meaning its falling
 				// if it is we enter the block
-				if (square.vel.vy < 0.0f) {
+				if (square.vel.vy <= 0.0f) {
 					// invert velocity upward and reduce velocity a bit by e
 					square.vel.vy = -square.vel.vy * e;
 
 					// check the ABS of current velocity is very small
 					// this prevents very small bounces
-					if (std::abs(square.vel.vy) < 0.05f) {
+					if (std::abs(square.vel.vy) <= 0.05f) {
 						square.vel.vy = 0.0f; // make velocity 0
 						square.pos.y = groundY;
 						square.motionValues.yMotion = false;
@@ -138,22 +139,22 @@ void squaresInMotion(std::vector<Square>& squares) { // pass in the vector of sq
 			}
 
 			// checks if both pos.y and the velocity are at 0. No more y movement
-			if (square.pos.y == groundY && square.vel.vy == 0.0f) {
+			if (square.pos.y == groundY && square.vel.vy <= 0.005f) {
 				// we check if
-				if (square.vel.vx > 0.0f) {
+				if (square.vel.vx >= 0.0f) {
 					square.vel.vx -= accelerationFriction * deltaTime;
 					if (square.vel.vx < 0.0f) {
 						square.vel.vx = 0.0f;
 					}
 				}
-				else if (square.vel.vx < 0.0f) {
+				else if (square.vel.vx <= 0.0f) {
 					square.vel.vx += accelerationFriction * deltaTime;
-					if (square.vel.vx > 0.0f) {
+					if (square.vel.vx >= 0.0f) {
 						square.vel.vx = 0.0f;
 					}
 				}
 
-				if (std::abs(square.vel.vx) < 0.05f) {
+				if (std::abs(square.vel.vx) <= 0.05f) {
 					square.vel.vx = 0.0f;
 					square.motionValues.xMotion = false;
 				}
