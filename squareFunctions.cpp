@@ -103,23 +103,21 @@ void squaresInMotion(std::vector<Square>& squares) { // pass in the vector of sq
 		computeEdges(square); // compute its edges and wall values first to have up to date values
 		float groundY = GLOBAL_FLOOR + square.pointSize / WINDOW_HEIGHT;
 		float accelerationFriction = mu * Gravity;
-		/*std::cout << square.name << " gound value: " << square.groundY << "\n";
-		std::cout << square.name << " y value: " << square.pos.y << "\n";
-		std::cout << "\n";*/
 
 		//check if square is currently in motion
 		if (square.motionValues.inMotion) {
-			std::cout << "We are in the motion block calculating physics" << "\n";
+			std::cout << "Is " << square.name << " moving?: " << (square.motionValues.inMotion ? "TRUE" : "FALSE") << "\n";
 			// if it is recompute its velocity and x/y position
 			// I think this is where the issue persists of the red square phasing through the blue on initial start.
 			// secifically this line is causing the issue: square.vel.vy = square.vel.vy - Gravity * deltaTime; when delta time is too big
-			square.vel.vy = square.vel.vy - Gravity * deltaTime;
-			square.pos.x = square.pos.x + square.vel.vx * deltaTime;
+			std::cout << "Calculating physics for: " << square.name << "\n";
+			square.vel.vy = square.vel.vy - (Gravity * deltaTime);
+			square.pos.x = square.pos.x + (square.vel.vx * deltaTime);
 			square.pos.y += square.vel.vy * deltaTime;
 
 			// check squares y position is less than its ground ground value or the GLOBAL_FLOOR value (-1.0f)
 			if (square.pos.y <= groundY) {
-				std::cout << "We are in the pos.y is less than groundy and pos.y is less than GLOABL_FLOOR Block" << "\n";
+				std::cout << "Snapping" << square.name << " to its ground value" << "\n";
 				square.pos.y = groundY; // snap the pos.y to be the groundY
 
 				//check if vel.vy is negative meaning its falling
@@ -192,14 +190,18 @@ bool squareCollides(Square& a, Square& b) {
 	computeEdges(a);
 	computeEdges(b);
 
-	// gets the center of both squares. Since both have pointSize of 15 units this is fine for now
-	// will not work if one or the other has a different point size
 	float halfWidthA = a.halfs.halfWidth;
 	float halfHeightA = a.halfs.halfHeight;
 	float halfWidthB = b.halfs.halfWidth;
 	float halfHeightB = b.halfs.halfHeight;
 	float halfWidthSum = halfWidthA + halfWidthB;
 	float halfHeightSum = halfHeightA+ halfHeightB;
+
+	std::cout << a.name << " current x position: " << a.pos.x << "\n";
+	std::cout << a.name << " current y position: " << a.pos.y << "\n";
+
+	std::cout << b.name << " current x position: " << b.pos.x << "\n";
+	std::cout << b.name << " current y position: " << b.pos.y << "\n";
 
 	// difference in x and y values between x and y positions
 	float dx = a.pos.x - b.pos.x;
@@ -209,7 +211,19 @@ bool squareCollides(Square& a, Square& b) {
 	dx = std::abs(dx);
 	dy = std::abs(dy);
 
+	std::cout << "dx: " << dx << "\n";
+	std::cout << "dy: " << dy << "\n";
+	std::cout << "Half height sum: " << halfHeightSum << "\n";
+	std::cout << "Half width sum: " << halfWidthSum << "\n";
+
 	// return true if both dx and dy are smaller that half (width/height)*2
+
+	std::cout << "dx is less than halfWidthSum: " << ((dx < halfWidthSum) ? "TRUE" : "FALSE") << "\n";
+	std::cout << "dy is less than halfHeigtSum: " << ((dy < halfHeightSum) ? "TRUE" : "FALSE") << "\n";
+
+	if (dx < halfWidthSum && dy < halfHeightSum) {
+		std::cout << "Both dx and dy are less than the halfs we have collided" << "\n";
+	}
 	return dx < halfWidthSum && dy < halfHeightSum;
 }
 
@@ -221,11 +235,15 @@ void swapVelocities(Square& a, Square& b, bool xAxisChange, bool yAxisChange) {
 
 		a.vel.vx = b.vel.vx;
 		b.vel.vx = tempVelX;
+
+		std::cout << a.name << " and " << b.name << " have swapped velocities on x axis" << "\n";
 	}
 	else if (xAxisChange == false && yAxisChange == true) {
 		float tempVelY = a.vel.vy;
 		a.vel.vy = b.vel.vy;
 		b.vel.vy = tempVelY;
+
+		std::cout << a.name << " and " << b.name << " have swapped velocities on y axis" << "\n";
 	}
 	else if (xAxisChange == true && yAxisChange == true) {
 		float tempVelX = a.vel.vx;
@@ -234,6 +252,8 @@ void swapVelocities(Square& a, Square& b, bool xAxisChange, bool yAxisChange) {
 		a.vel.vy = b.vel.vy;
 		b.vel.vx = tempVelX;
 		b.vel.vy = tempVelY;
+
+		std::cout << a.name << " and " << b.name << " have swapped velocities on both axis" << "\n";
 	}
 	else {
 		return;

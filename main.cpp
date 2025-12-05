@@ -1,4 +1,6 @@
 #include <iostream>
+#include <thread>
+#include <chrono>
 #include "squareFunction.h"
 
 #include <glad/glad.h>
@@ -82,7 +84,7 @@ const char* fragmentShaderSrcC = R"(
 		out vec4 FragColor;
 
 		void main() {
-			FragColor = vec4(1.0, 0.7, 0.8, 0.4); // solid red
+			FragColor = vec4(1.0, 0.2, 0.8, 0.4); // solid pink
 		}
 	)";
 
@@ -119,7 +121,7 @@ int main() {
 	squareA.vel.vy = -0.6f;
 
 	squareA.pointSize = 15.0f;
-	squareA.name = "SquareA";
+	squareA.name = "red";
 
 	squareB.pos.x = -0.8f;
 	squareB.pos.y = 0.6f;
@@ -128,7 +130,7 @@ int main() {
 	squareB.vel.vy = -0.3f;
 
 	squareB.pointSize = 30.0f;
-	squareB.name = "SquareB";
+	squareB.name = "blue";
 
 	squareC.pos.x = -0.2f;
 	squareC.pos.y = 1.0f;
@@ -137,7 +139,7 @@ int main() {
 	squareC.vel.vy = -0.3f;
 
 	squareC.pointSize = 60.0f;
-	squareC.name = "SquareC";
+	squareC.name = "pink";
 
 	squareD.pos.x = 0.5f;
 	squareD.pos.y = -0.6f;
@@ -146,7 +148,7 @@ int main() {
 	squareD.vel.vy = 0.5f;
 
 	squareD.pointSize = 50.0f;
-	squareD.name = "SquareD";
+	squareD.name = "green";
 
 	squaresVector.push_back(squareA);
 	squaresVector.push_back(squareB);
@@ -279,6 +281,8 @@ int main() {
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(200));
 	}
 
 	glDeleteBuffers(1, &VBO);

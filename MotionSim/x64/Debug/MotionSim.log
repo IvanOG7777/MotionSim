@@ -1,10 +1,5 @@
-﻿  main.cpp
-C:\Users\elder\OneDrive\Desktop\C++Projects\MotionSim\globalConstants.h(7,17): warning C4305: 'initializing': truncation from 'double' to 'float'
-  (compiling source file 'main.cpp')
-  
-  squareFunctions.cpp
+﻿  squareFunctions.cpp
 C:\Users\elder\OneDrive\Desktop\C++Projects\MotionSim\globalConstants.h(7,17): warning C4305: 'initializing': truncation from 'double' to 'float'
   (compiling source file 'squareFunctions.cpp')
   
-  Generating Code...
   MotionSim.vcxproj -> C:\Users\elder\OneDrive\Desktop\C++Projects\MotionSim\x64\Debug\MotionSim.exe
