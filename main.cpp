@@ -227,12 +227,10 @@ int main() {
 	GLint uPositionLocD = glGetUniformLocation(programD, "uPosition");
 	GLint uPointSizeLocD = glGetUniformLocation(programD, "uPointSize");
 
+	
 	while (!glfwWindowShouldClose(window)) {
 		
-		squaresInMotion(squaresVector);
-		collisionDetectionSweepAndPrune(squaresVector);
-		/*std::cout << "Within main loop: " << GLOBAL_FLOOR << std::endl;*/
-
+		updateGame(squaresVector, deltaTime);
 		/*bool running = runningSquares(squaresVector);
 
 		if (running == false) {
@@ -282,7 +280,7 @@ int main() {
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 
-		std::this_thread::sleep_for(std::chrono::milliseconds(200));
+		/*std::this_thread::sleep_for(std::chrono::milliseconds(200));*/
 	}
 
 	glDeleteBuffers(1, &VBO);

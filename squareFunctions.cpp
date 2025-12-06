@@ -4,6 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include <iostream>
+#include <ctime>
 
 // function to check is all squares are still in motion
 bool runningSquares(std::vector<Square>& squares) { // pass in vector of squares
@@ -95,8 +96,11 @@ void keepInBounds(Square& square, bool isHorizontal) { // pass in the square we 
 }
 
 
+//POTENTIAL FIX:
+//	Tuneling happens becasue the velocity in y direction is faster than the distance y from a and b
+
 // function used to move each square individually with physics
-void squaresInMotion(std::vector<Square>& squares) { // pass in the vector of squares
+void squaresInMotion(std::vector<Square>& squares, float deltaTime) { // pass in the vector of squares
 
 	// loop over each square within the vector
 	for (auto& square : squares) {
@@ -106,18 +110,18 @@ void squaresInMotion(std::vector<Square>& squares) { // pass in the vector of sq
 
 		//check if square is currently in motion
 		if (square.motionValues.inMotion) {
-			std::cout << "Is " << square.name << " moving?: " << (square.motionValues.inMotion ? "TRUE" : "FALSE") << "\n";
+			/*std::cout << "Is " << square.name << " moving?: " << (square.motionValues.inMotion ? "TRUE" : "FALSE") << "\n";*/
 			// if it is recompute its velocity and x/y position
 			// I think this is where the issue persists of the red square phasing through the blue on initial start.
 			// secifically this line is causing the issue: square.vel.vy = square.vel.vy - Gravity * deltaTime; when delta time is too big
-			std::cout << "Calculating physics for: " << square.name << "\n";
-			square.vel.vy = square.vel.vy - (Gravity * deltaTime);
+			/*std::cout << "Calculating physics for: " << square.name << "\n";*/
+			square.vel.vy = square.vel.vy - Gravity * deltaTime;
 			square.pos.x = square.pos.x + (square.vel.vx * deltaTime);
 			square.pos.y += square.vel.vy * deltaTime;
 
 			// check squares y position is less than its ground ground value or the GLOBAL_FLOOR value (-1.0f)
 			if (square.pos.y <= groundY) {
-				std::cout << "Snapping" << square.name << " to its ground value" << "\n";
+				/*std::cout << "Snapping" << square.name << " to its ground value" << "\n";*/
 				square.pos.y = groundY; // snap the pos.y to be the groundY
 
 				//check if vel.vy is negative meaning its falling
@@ -197,34 +201,42 @@ bool squareCollides(Square& a, Square& b) {
 	float halfWidthSum = halfWidthA + halfWidthB;
 	float halfHeightSum = halfHeightA+ halfHeightB;
 
-	std::cout << a.name << " current x position: " << a.pos.x << "\n";
-	std::cout << a.name << " current y position: " << a.pos.y << "\n";
-
-	std::cout << b.name << " current x position: " << b.pos.x << "\n";
-	std::cout << b.name << " current y position: " << b.pos.y << "\n";
-
-	// difference in x and y values between x and y positions
 	float dx = a.pos.x - b.pos.x;
 	float dy = a.pos.y - b.pos.y;
 
-	// get the absolute value of both differences
 	dx = std::abs(dx);
 	dy = std::abs(dy);
 
-	std::cout << "dx: " << dx << "\n";
-	std::cout << "dy: " << dy << "\n";
-	std::cout << "Half height sum: " << halfHeightSum << "\n";
-	std::cout << "Half width sum: " << halfWidthSum << "\n";
-
-	// return true if both dx and dy are smaller that half (width/height)*2
-
-	std::cout << "dx is less than halfWidthSum: " << ((dx < halfWidthSum) ? "TRUE" : "FALSE") << "\n";
-	std::cout << "dy is less than halfHeigtSum: " << ((dy < halfHeightSum) ? "TRUE" : "FALSE") << "\n";
-
-	if (dx < halfWidthSum && dy < halfHeightSum) {
-		std::cout << "Both dx and dy are less than the halfs we have collided" << "\n";
+	// check if the distance betwen square in X axis is greater than thier halfWidthSum
+	// if it is we are to far to collide
+	if (dx >= halfWidthSum) {
+		return false;
 	}
-	return dx < halfWidthSum && dy < halfHeightSum;
+
+	// check if the distance between squares in the Y axis is less than thier halfHeightSum
+	// if distance is less return true meaning we have collided
+	if (dy < halfHeightSum) {
+		return true;
+	}
+
+	// calculate the relavent velocity between a and b y velocites
+	float relaventVy = a.vel.vy - b.vel.vy;
+
+	// if that velocity is 0 we cant get any closer vertically
+	if (relaventVy == 0.0f) {
+		return false;
+	}
+
+	if ((a.pos.y > b.pos.y && relaventVy >= 0.0f) || (a.pos.y < b.pos.y && relaventVy <= 0.0f)) {
+		return false;
+	}
+
+	float gap = dy - halfHeightSum;
+
+	float maxApproach = std::abs(relaventVy) * deltaTime;
+
+	
+	return maxApproach >= gap;
 }
 
 void swapVelocities(Square& a, Square& b, bool xAxisChange, bool yAxisChange) {
@@ -236,14 +248,14 @@ void swapVelocities(Square& a, Square& b, bool xAxisChange, bool yAxisChange) {
 		a.vel.vx = b.vel.vx;
 		b.vel.vx = tempVelX;
 
-		std::cout << a.name << " and " << b.name << " have swapped velocities on x axis" << "\n";
+		/*std::cout << a.name << " and " << b.name << " have swapped velocities on x axis" << "\n";*/
 	}
 	else if (xAxisChange == false && yAxisChange == true) {
 		float tempVelY = a.vel.vy;
 		a.vel.vy = b.vel.vy;
 		b.vel.vy = tempVelY;
 
-		std::cout << a.name << " and " << b.name << " have swapped velocities on y axis" << "\n";
+		/*std::cout << a.name << " and " << b.name << " have swapped velocities on y axis" << "\n";*/
 	}
 	else if (xAxisChange == true && yAxisChange == true) {
 		float tempVelX = a.vel.vx;
@@ -253,7 +265,7 @@ void swapVelocities(Square& a, Square& b, bool xAxisChange, bool yAxisChange) {
 		b.vel.vx = tempVelX;
 		b.vel.vy = tempVelY;
 
-		std::cout << a.name << " and " << b.name << " have swapped velocities on both axis" << "\n";
+		/*std::cout << a.name << " and " << b.name << " have swapped velocities on both axis" << "\n";*/
 	}
 	else {
 		return;
@@ -266,7 +278,7 @@ bool isOnTop(Square& squareA, Square& squareB) {
 	computeEdges(squareB);
 
 	// test to see if the bottom square, square a
-	bool verticalTouch = std::abs(squareA.edges.bottom - squareB.edges.top) < 0.005f;
+	bool verticalTouch = std::abs(squareA.edges.bottom - squareB.edges.top) < 0.01f;
 	bool horizontalOverlap =
 		(squareA.edges.right > squareB.edges.left) && (squareA.edges.left < squareB.edges.right);
 	bool fallingOrResting = squareA.vel.vy <= 0.0f;
@@ -426,7 +438,6 @@ void collisionDetectionSweepAndPrune(std::vector<Square> &squares) {
 							keepInBounds(a, false);
 							keepInBounds(b, false);
 						}
-
 						/*swapVelocities(a, b);*/
 						swapVelocities(a, b, false, true);
 					}
@@ -436,4 +447,11 @@ void collisionDetectionSweepAndPrune(std::vector<Square> &squares) {
 		active.push_back(indexCurrent); // push indexCurrent into active
 		candidatePairs.clear(); // clear the canidate pairs to have fresh pair on next itteration.
 	}
+}
+
+void updateGame(std::vector<Square>& squares, float frameDt) {
+	
+		squaresInMotion(squares, frameDt);
+		collisionDetectionSweepAndPrune(squares);
+
 }
