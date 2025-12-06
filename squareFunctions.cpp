@@ -188,54 +188,55 @@ bool isPlatform(Square& square) {
 	return platform; // return true or flase if it can be used as a platform
 }
 
-// TODO: Square collides with another square IF its NOT WORLD WALL or WORLD BOTTOM/TOP
-// This logically will mean that if it hits anything that isnt a WORLD boundry it has to be another square
-bool squareCollides(Square& a, Square& b) {
+// bool function to detect if squares have collided
+bool squareCollides(Square& a, Square& b) { // parameters are 2 square objects
 	computeEdges(a);
 	computeEdges(b);
+	// recompute thier edges are current state to have up to date values
 
-	float halfWidthA = a.halfs.halfWidth;
-	float halfHeightA = a.halfs.halfHeight;
-	float halfWidthB = b.halfs.halfWidth;
-	float halfHeightB = b.halfs.halfHeight;
-	float halfWidthSum = halfWidthA + halfWidthB;
-	float halfHeightSum = halfHeightA+ halfHeightB;
+	// calculate the half height and width of both squares
+	float halfWidthSum = a.halfs.halfWidth + a.halfs.halfWidth;
+	float halfHeightSum = a.halfs.halfHeight+ b.halfs.halfHeight;
 
-	float dx = a.pos.x - b.pos.x;
-	float dy = a.pos.y - b.pos.y;
-
-	dx = std::abs(dx);
-	dy = std::abs(dy);
+	// calcualte the distance between the squares x and y current positions
+	float dx = std:: abs(a.pos.x - b.pos.x);
+	float dy = std:: abs(a.pos.y - b.pos.y);
 
 	// check if the distance betwen square in X axis is greater than thier halfWidthSum
-	// if it is we are to far to collide
+	// if it is we are to far away on the x axis they we know they dont collide
 	if (dx >= halfWidthSum) {
 		return false;
 	}
 
 	// check if the distance between squares in the Y axis is less than thier halfHeightSum
-	// if distance is less return true meaning we have collided
+	// if distance is less return true meaning the squares are either touching or are overlapping with eachother
 	if (dy < halfHeightSum) {
 		return true;
 	}
 
-	// calculate the relavent velocity between a and b y velocites
-	float relaventVy = a.vel.vy - b.vel.vy;
+	// calculate the relative velocity between a and b y velocites
+	// tess us how fast a is approaching or leaving b along the y axis
+	float relativeVy = a.vel.vy - b.vel.vy;
 
-	// if that velocity is 0 we cant get any closer vertically
-	if (relaventVy == 0.0f) {
+	// if that realative velocity is 0 squares cant get any closer vertically
+	// if both have the same downward y velocity even if falling together, they stay the same distance apart
+	// no new collison can happen in current frame
+	if (relativeVy == 0.0f) {
 		return false;
 	}
 
-	if ((a.pos.y > b.pos.y && relaventVy >= 0.0f) || (a.pos.y < b.pos.y && relaventVy <= 0.0f)) {
+	// this block checks if both squares are moving towards eachother, checks if a is either above or below b in the y axis
+	if ((a.pos.y > b.pos.y && relativeVy >= 0.0f) || (a.pos.y < b.pos.y && relativeVy <= 0.0f)) {
 		return false;
 	}
 
+	// calculate the gap, which is the distance between the two squares minus their half Height sum
 	float gap = dy - halfHeightSum;
 
-	float maxApproach = std::abs(relaventVy) * deltaTime;
+	// maxAproach calculates the minimum distance the squares will vertically close within a frame.
+	float maxApproach = std::abs(relativeVy) * deltaTime;
 
-	
+	// if squares cna move  far enough in current fram to eleminate the gap we have collided in this frame
 	return maxApproach >= gap;
 }
 
