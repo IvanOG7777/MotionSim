@@ -106,7 +106,6 @@ void squaresInMotion(std::vector<Square>& squares, float deltaTime) { // pass in
 	for (auto& square : squares) {
 		computeEdges(square); // compute its edges and wall values first to have up to date values
 		float groundY = GLOBAL_FLOOR + square.pointSize / WINDOW_HEIGHT;
-		float accelerationFriction = mu * Gravity;
 
 		//check if square is currently in motion
 		if (square.motionValues.inMotion) {
@@ -120,7 +119,7 @@ void squaresInMotion(std::vector<Square>& squares, float deltaTime) { // pass in
 			square.pos.y += square.vel.vy * deltaTime;
 
 			// check squares y position is less than its ground ground value or the GLOBAL_FLOOR value (-1.0f)
-			if (square.pos.y <= groundY) {
+			if (square.pos.y < groundY) {
 				/*std::cout << "Snapping" << square.name << " to its ground value" << "\n";*/
 				square.pos.y = groundY; // snap the pos.y to be the groundY
 
@@ -129,6 +128,7 @@ void squaresInMotion(std::vector<Square>& squares, float deltaTime) { // pass in
 				if (square.vel.vy <= 0.0f) {
 					// invert velocity upward and reduce velocity a bit by e
 					square.vel.vy = -square.vel.vy * e;
+
 
 					// check the ABS of current velocity is very small
 					// this prevents very small bounces
@@ -139,34 +139,24 @@ void squaresInMotion(std::vector<Square>& squares, float deltaTime) { // pass in
 					}
 				}
 			}
-
 			// checks if both pos.y and the velocity are at 0. No more y movement
-			if (square.pos.y == groundY && square.vel.vy <= 0.005f) {
-				// we check if
-				if (square.vel.vx >= 0.0f) {
-					square.vel.vx -= accelerationFriction * deltaTime;
-					if (square.vel.vx < 0.0f) {
+			if (square.pos.y == groundY && square.vel.vy == 0.0f) {
+				// Check if the velocity in the x axis is positive, meaning we are moving to the right
+				if (square.vel.vx > 0.0f) {
+					square.vel.vx -= accelerationFriction * deltaTime; // subtract a bit from the velocity using friction * time
+					if (std::abs(square.vel.vx) <= 0.15f) { // check if the velocity 
 						square.vel.vx = 0.0f;
+						square.motionValues.xMotion = false;
 					}
 				}
-				else if (square.vel.vx <= 0.0f) {
+				else if (square.vel.vx < 0.0f) {
 					square.vel.vx += accelerationFriction * deltaTime;
-					if (square.vel.vx >= 0.0f) {
+					if (std::abs(square.vel.vx) <= 0.15f) {
 						square.vel.vx = 0.0f;
+						square.motionValues.xMotion = false;
 					}
-				}
-
-				if (std::abs(square.vel.vx) <= 0.05f) {
-					square.vel.vx = 0.0f;
-					square.motionValues.xMotion = false;
 				}
 			}
-
-			//two if block to keep ball within the boundries
-
-			/*keepInBounds(square);*/
-
-			//if pos.x is greater than the right wall NDC 1.0f AND vel.vs is greater than 0
 
 			keepInBounds(square, true);
 			keepInBounds(square, false);

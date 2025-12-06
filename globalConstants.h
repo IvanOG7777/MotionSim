@@ -6,3 +6,4 @@ const float Gravity = 2.0f;
 const float deltaTime = 0.016f;
 const float e = 0.8;
 const float mu = 1.0;
+const float accelerationFriction = mu * Gravity;

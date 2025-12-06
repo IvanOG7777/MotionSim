@@ -7,6 +7,10 @@
       "RelativeMoniker": "D:0:0:{346E5E22-9D01-4391-842F-85088908B5CB}|MotionSim.vcxproj|solutionrelative:squareFunctions.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{346E5E22-9D01-4391-842F-85088908B5CB}|MotionSim.vcxproj|C:\\Users\\elder\\OneDrive\\Desktop\\C\u002B\u002BProjects\\MotionSim\\globalConstants.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{346E5E22-9D01-4391-842F-85088908B5CB}|MotionSim.vcxproj|solutionrelative:globalConstants.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{346E5E22-9D01-4391-842F-85088908B5CB}|MotionSim.vcxproj|C:\\Users\\elder\\OneDrive\\Desktop\\C\u002B\u002BProjects\\MotionSim\\notes.txt||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{346E5E22-9D01-4391-842F-85088908B5CB}|MotionSim.vcxproj|solutionrelative:notes.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
@@ -17,10 +21,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{346E5E22-9D01-4391-842F-85088908B5CB}|MotionSim.vcxproj|C:\\Users\\elder\\OneDrive\\Desktop\\C\u002B\u002BProjects\\MotionSim\\squareFunction.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{346E5E22-9D01-4391-842F-85088908B5CB}|MotionSim.vcxproj|solutionrelative:squareFunction.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{346E5E22-9D01-4391-842F-85088908B5CB}|MotionSim.vcxproj|C:\\Users\\elder\\OneDrive\\Desktop\\C\u002B\u002BProjects\\MotionSim\\globalConstants.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{346E5E22-9D01-4391-842F-85088908B5CB}|MotionSim.vcxproj|solutionrelative:globalConstants.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -38,15 +38,16 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 1,
               "Title": "globalConstants.h",
               "DocumentMoniker": "C:\\Users\\elder\\OneDrive\\Desktop\\C\u002B\u002BProjects\\MotionSim\\globalConstants.h",
               "RelativeDocumentMoniker": "globalConstants.h",
               "ToolTip": "C:\\Users\\elder\\OneDrive\\Desktop\\C\u002B\u002BProjects\\MotionSim\\globalConstants.h",
               "RelativeToolTip": "globalConstants.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-12-01T21:54:45.02Z"
+              "WhenOpened": "2025-12-01T21:54:45.02Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -56,14 +57,14 @@
               "RelativeDocumentMoniker": "squareFunctions.cpp",
               "ToolTip": "C:\\Users\\elder\\OneDrive\\Desktop\\C\u002B\u002BProjects\\MotionSim\\squareFunctions.cpp",
               "RelativeToolTip": "squareFunctions.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACUAAAABAAAAAAAAAA==",
+              "ViewState": "AgIAAL8BAAAAAAAAAAAAAJkAAAApAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-12-01T21:53:31.706Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "notes.txt",
               "DocumentMoniker": "C:\\Users\\elder\\OneDrive\\Desktop\\C\u002B\u002BProjects\\MotionSim\\notes.txt",
               "RelativeDocumentMoniker": "notes.txt",
@@ -71,12 +72,11 @@
               "RelativeToolTip": "notes.txt",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAyAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
-              "WhenOpened": "2025-12-04T17:19:24.381Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-04T17:19:24.381Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "squareFunction.h",
               "DocumentMoniker": "C:\\Users\\elder\\OneDrive\\Desktop\\C\u002B\u002BProjects\\MotionSim\\squareFunction.h",
               "RelativeDocumentMoniker": "squareFunction.h",
@@ -84,8 +84,7 @@
               "RelativeToolTip": "squareFunction.h",
               "ViewState": "AgIAACQAAAAAAAAAAAAAAEMAAAA4AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-12-01T21:53:11.761Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-01T21:53:11.761Z"
             }
           ]
         }
@@ -110,7 +109,7 @@
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "main.cpp",
               "DocumentMoniker": "C:\\Users\\elder\\OneDrive\\Desktop\\C\u002B\u002BProjects\\MotionSim\\main.cpp",
               "RelativeDocumentMoniker": "main.cpp",
