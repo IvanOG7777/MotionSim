@@ -103,6 +103,7 @@ int main() {
 	Square squareB;
 	Square squareC;
 	Square squareD;
+	char pressedKey;
 	std::vector<Square> squaresVector;
 
 	int currentStep = 0;

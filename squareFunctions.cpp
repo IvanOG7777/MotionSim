@@ -140,29 +140,29 @@ void squaresInMotion(std::vector<Square>& squares, float deltaTime) { // pass in
 				}
 			}
 			// checks if both pos.y and the velocity are at 0. No more y movement
-			if (square.pos.y == groundY && square.vel.vy == 0.0f) {
+			if (square.pos.y <= groundY && square.motionValues.yMotion == false) {
 				// Check if the velocity in the x axis is positive, meaning we are moving to the right
 				if (square.vel.vx > 0.0f) {
 					square.vel.vx -= accelerationFriction * deltaTime; // subtract a bit from the velocity using friction * time
-					if (std::abs(square.vel.vx) <= 0.15f) { // check if the velocity 
+					if (std::abs(square.vel.vx) <= 0.016f) { // check if the velocity
 						square.vel.vx = 0.0f;
 						square.motionValues.xMotion = false;
 					}
 				}
 				else if (square.vel.vx < 0.0f) {
 					square.vel.vx += accelerationFriction * deltaTime;
-					if (std::abs(square.vel.vx) <= 0.15f) {
+					if (std::abs(square.vel.vx) <= 0.016f) {
 						square.vel.vx = 0.0f;
 						square.motionValues.xMotion = false;
 					}
 				}
 			}
-
 			keepInBounds(square, true);
 			keepInBounds(square, false);
 
 			if (!square.motionValues.xMotion && !square.motionValues.yMotion) square.motionValues.inMotion = false;
 		}
+
 	}
 }
 
