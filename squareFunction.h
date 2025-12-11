@@ -53,6 +53,7 @@ public:
 	float squaresGround;
 	std::string name;
 };
+
 bool runningSquares(std::vector<Square>& squares);
 void squaresInMotion(std::vector<Square>& squares, float deltaTime);
 void computeEdges(Square& square);
@@ -64,5 +65,6 @@ bool isOnTop(Square& squareA, Square& squareB);
 void collisionDetectionNestedLoop(std::vector<Square>& squares);
 void keepInBounds(Square& square, bool isHorizontal);
 void collisionDetectionSweepAndPrune(std::vector<Square> &squares);
-time_t getCurrentTime();
 void updateGame(std::vector<Square>& squares, float dt);
+float randomT();
+Square createSquare();

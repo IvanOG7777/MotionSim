@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <iostream>
 #include <ctime>
+#include <cassert>
+#include <memory>
 
 // function to check is all squares are still in motion
 bool runningSquares(std::vector<Square>& squares) { // pass in vector of squares
@@ -445,4 +447,40 @@ void updateGame(std::vector<Square>& squares, float frameDt) {
 		squaresInMotion(squares, frameDt);
 		collisionDetectionSweepAndPrune(squares);
 
+}
+
+float randomT() {
+	float t = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+	return t;
+}
+
+Square createSquare() {
+	Square newSquare;
+
+	float minFloat = -1.0f;
+	float maxFloat = 1.0f;
+	float t1 = randomT();
+	float t2 = randomT();
+	float t3 = randomT();
+	float t4 = randomT();
+	int randPointSize = rand() % 61;
+	if (randPointSize < 10) {
+		randPointSize = 10;
+	}
+
+	float randomVelX = minFloat + (maxFloat - minFloat) * t1;
+	float randomVelY = minFloat + (maxFloat - minFloat) * t2;
+	float randomPosX = minFloat + (maxFloat - minFloat) * t3;
+	float randomPosY = minFloat + (maxFloat - minFloat) * t4;
+
+	newSquare.vel.vx = randomVelX;
+	newSquare.vel.vy = randomVelY;
+	newSquare.pos.x = randomPosX;
+	newSquare.pos.y = randomPosY;
+	newSquare.pointSize = static_cast<float>(randPointSize);
+
+	computeEdges(newSquare);
+
+
+	return newSquare;
 }

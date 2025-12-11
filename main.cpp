@@ -228,6 +228,20 @@ int main() {
 	GLint uPositionLocD = glGetUniformLocation(programD, "uPosition");
 	GLint uPointSizeLocD = glGetUniformLocation(programD, "uPointSize");
 
+	srand(static_cast<unsigned>(time(nullptr)));
+
+	Square newSquare = createSquare();
+
+	std::cout << "New squares values" << std::endl;
+
+	std::cout << "Velocity: " << std::endl;
+	std::cout << newSquare.vel.vx << "," << newSquare.vel.vy << std::endl;
+
+	std::cout << "Position: " << std::endl;
+	std::cout << newSquare.pos.x << "," << newSquare.pos.y << std::endl;
+
+	std::cout << "Point Size: " << std::endl;
+	std::cout << newSquare.pointSize << std::endl;
 	
 	while (!glfwWindowShouldClose(window)) {
 		
