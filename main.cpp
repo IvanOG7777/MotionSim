@@ -103,11 +103,14 @@ int main() {
 	Square squareB;
 	Square squareC;
 	Square squareD;
-	char pressedKey;
+	//char pressedKey;
 	std::vector<Square> squaresVector;
+	std::vector<GLuint> programVector;
+	std::vector<GLint> positionLocVector;
+	std::vector<GLint> pointSizeLocVector;
 
 	int currentStep = 0;
-	
+
 	int bounceCount = 0;
 	int hitWallCount = 0;
 	float accelerationFriction = mu * Gravity;
@@ -193,9 +196,16 @@ int main() {
 	GLuint programB = createProgram(vertexShaderSrc, fragmentShaderSrcB);
 	GLuint programC = createProgram(vertexShaderSrc, fragmentShaderSrcC);
 	GLuint programD = createProgram(vertexShaderSrc, fragmentShaderSrcD);
-	if (!programA || !programB || !programC || !programD) {
-		glfwTerminate();
-		return -1;
+	programVector.push_back(programA);
+	programVector.push_back(programB);
+	programVector.push_back(programC);
+	programVector.push_back(programD);
+
+	for (auto program : programVector) {
+		if (!program) {
+			glfwTerminate();
+			return -1;
+		}
 	}
 
 	float point[] = { 0.0f, 0.0f };
@@ -228,6 +238,16 @@ int main() {
 	GLint uPositionLocD = glGetUniformLocation(programD, "uPosition");
 	GLint uPointSizeLocD = glGetUniformLocation(programD, "uPointSize");
 
+	positionLocVector.push_back(uPositionLocA);
+	positionLocVector.push_back(uPositionLocB);
+	positionLocVector.push_back(uPositionLocC);
+	positionLocVector.push_back(uPositionLocD);
+
+	pointSizeLocVector.push_back(uPointSizeLocA);
+	pointSizeLocVector.push_back(uPointSizeLocB);
+	pointSizeLocVector.push_back(uPointSizeLocC);
+	pointSizeLocVector.push_back(uPointSizeLocD);
+
 	srand(static_cast<unsigned>(time(nullptr)));
 
 	/*Square newSquare = createSquare();
@@ -242,20 +262,14 @@ int main() {
 
 	std::cout << "Point Size: " << std::endl;
 	std::cout << newSquare.pointSize << std::endl;*/
-
-	int pressedKey;
-	
 	while (!glfwWindowShouldClose(window)) {
 
-		while (pressedKey != 81 || pressedKey != 113) {
-			std::cout << "Press space to spawn in square or q to quit: ";
-			pressedKey = getchar();
-			if (pressedKey == 32) {
-				Square newSquare = createSquare();
-				squaresVector.push_back(newSquare);
-			}
+		if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+			Square newSquare = createSquare();
+
+			squaresVector.push_back(newSquare);
 		}
-		
+
 		updateGame(squaresVector, deltaTime);
 		/*bool running = runningSquares(squaresVector);
 
@@ -263,49 +277,20 @@ int main() {
 			glfwTerminate();
 			return 0;
 		}*/
-	
-
 		glClear(GL_COLOR_BUFFER_BIT);
-
 		glBindVertexArray(VAO);
 
-		for (size_t i = 0; i < squaresVector.size(); ++i) {
-			Square& square = squaresVector[i];
-
-			if (i == 0) {
-				// squareA
-				glUseProgram(programA);
-				glUniform2f(uPositionLocA, square.pos.x, square.pos.y);
-				glUniform1f(uPointSizeLocA, square.pointSize);
-			}
-
-			if (i == 1) {
-				// squareB
-				glUseProgram(programB);
-				glUniform2f(uPositionLocB, square.pos.x, square.pos.y);
-				glUniform1f(uPointSizeLocB, square.pointSize);
-			}
-
-			if (i == 2) {
-				// squareC
-				glUseProgram(programC);
-				glUniform2f(uPositionLocC, square.pos.x, square.pos.y);
-				glUniform1f(uPointSizeLocC, square.pointSize);
-			}
-
-			if (i == 3) {
-				// squareD
-				glUseProgram(programD);
-				glUniform2f(uPositionLocD, square.pos.x, square.pos.y);
-				glUniform1f(uPointSizeLocD, square.pointSize);
-			}
+		for (int i = 0; i < squaresVector.size(); i++) {
+			int colorIndex = static_cast<int>(i % programVector.size());
+			glUseProgram(programVector[colorIndex]);
+			glUniform2f(positionLocVector[colorIndex], squaresVector[i].pos.x, squaresVector[i].pos.y);
+			glUniform1f(pointSizeLocVector[colorIndex], squaresVector[i].pointSize);
 
 			glDrawArrays(GL_POINTS, 0, 1);
 		}
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
-
 		/*std::this_thread::sleep_for(std::chrono::milliseconds(200));*/
 	}
 
