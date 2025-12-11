@@ -93,7 +93,7 @@ const char* fragmentShaderSrcD = R"(
 		out vec4 FragColor;
 
 		void main() {
-			FragColor = vec4(0.2, 0.8, 0.0, -1.0); // bright cyan
+			FragColor = vec4(0.2, 0.8, 0.0, 1.0); // bright cyan
 		}
 	)";
 
@@ -230,7 +230,7 @@ int main() {
 
 	srand(static_cast<unsigned>(time(nullptr)));
 
-	Square newSquare = createSquare();
+	/*Square newSquare = createSquare();
 
 	std::cout << "New squares values" << std::endl;
 
@@ -241,9 +241,20 @@ int main() {
 	std::cout << newSquare.pos.x << "," << newSquare.pos.y << std::endl;
 
 	std::cout << "Point Size: " << std::endl;
-	std::cout << newSquare.pointSize << std::endl;
+	std::cout << newSquare.pointSize << std::endl;*/
+
+	int pressedKey;
 	
 	while (!glfwWindowShouldClose(window)) {
+
+		while (pressedKey != 81 || pressedKey != 113) {
+			std::cout << "Press space to spawn in square or q to quit: ";
+			pressedKey = getchar();
+			if (pressedKey == 32) {
+				Square newSquare = createSquare();
+				squaresVector.push_back(newSquare);
+			}
+		}
 		
 		updateGame(squaresVector, deltaTime);
 		/*bool running = runningSquares(squaresVector);

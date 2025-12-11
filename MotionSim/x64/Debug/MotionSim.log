@@ -2,10 +2,7 @@
 C:\Users\elder\OneDrive\Desktop\C++Projects\MotionSim\globalConstants.h(7,17): warning C4305: 'initializing': truncation from 'double' to 'float'
   (compiling source file 'main.cpp')
   
-C:\Users\elder\OneDrive\Desktop\C++Projects\MotionSim\main.cpp(106,7): warning C4101: 'pressedKey': unreferenced local variable
-  squareFunctions.cpp
-C:\Users\elder\OneDrive\Desktop\C++Projects\MotionSim\globalConstants.h(7,17): warning C4305: 'initializing': truncation from 'double' to 'float'
-  (compiling source file 'squareFunctions.cpp')
+C:\Users\elder\OneDrive\Desktop\C++Projects\MotionSim\main.cpp(246,6): error C2371: 'pressedKey': redefinition; different basic types
+      C:\Users\elder\OneDrive\Desktop\C++Projects\MotionSim\main.cpp(106,7):
+      see declaration of 'pressedKey'
   
-  Generating Code...
-  MotionSim.vcxproj -> C:\Users\elder\OneDrive\Desktop\C++Projects\MotionSim\x64\Debug\MotionSim.exe
