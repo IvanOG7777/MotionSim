@@ -3,10 +3,7 @@
 #include <cmath>
 #include <vector>
 #include <algorithm>
-#include <iostream>
-#include <ctime>
-#include <cassert>
-#include <memory>
+
 
 // function to check is all squares are still in motion
 bool runningSquares(std::vector<Square>& squares) { // pass in vector of squares
@@ -173,7 +170,7 @@ void squaresInMotion(std::vector<Square>& squares, float deltaTime) { // pass in
 bool isPlatform(Square& square) {
 	computeEdges(square); // computes squares edges
 	bool platform = false;
-	if (std::abs(square.vel.vy) < 0.0005f) { // if squares velocity is close to 0
+	if (std::abs(square.vel.vy) < 0.016f) { // if squares velocity is close to 0
 		platform = true; // say yes it can be used as a platform
 	}
 
@@ -187,7 +184,7 @@ bool squareCollides(Square& a, Square& b) { // parameters are 2 square objects
 	// recompute thier edges are current state to have up to date values
 
 	// calculate the half height and width of both squares
-	float halfWidthSum = a.halfs.halfWidth + a.halfs.halfWidth;
+	float halfWidthSum = a.halfs.halfWidth + b.halfs.halfWidth;
 	float halfHeightSum = a.halfs.halfHeight+ b.halfs.halfHeight;
 
 	// calcualte the distance between the squares x and y current positions
@@ -271,37 +268,39 @@ bool isOnTop(Square& squareA, Square& squareB) {
 	computeEdges(squareB);
 
 	// test to see if the bottom square, square a
-	bool verticalTouch = std::abs(squareA.edges.bottom - squareB.edges.top) < 0.01f;
+	bool verticalTouch = std::abs(squareA.edges.bottom - squareB.edges.top) < 0.016f;
 	bool horizontalOverlap =
 		(squareA.edges.right > squareB.edges.left) && (squareA.edges.left < squareB.edges.right);
-	bool fallingOrResting = squareA.vel.vy <= 0.0f;
+	bool fallingOrResting = squareA.vel.vy <= 0.016f;
 
 	return verticalTouch && horizontalOverlap && fallingOrResting;
 }
 
-void collisionDetectionNestedLoop(std::vector<Square>& squares) {
-	for (int i = 0; i < squares.size(); i++) {
-		for (int j = i + 1; j < squares.size(); j++) {
-			if (squareCollides(squares[i], squares[j])) {
-				if (isPlatform(squares[j]) && isOnTop(squares[i], squares[j])) {
-					squares[i].pos.y = squares[j].edges.top + squares[i].halfs.halfHeight;
-					squares[i].vel.vy = 0.0f;
-					squares[i].motionValues.yMotion = false;
-					squares[i].motionValues.inMotion = false;
-				}
-				else if (isPlatform(squares[i]) && isOnTop(squares[j], squares[i])) {
-					squares[j].pos.y = squares[i].edges.top + squares[j].halfs.halfHeight;
-					squares[j].vel.vy = 0.0f;
-					squares[j].motionValues.yMotion = false;
-					squares[j].motionValues.inMotion = false;
-				}
-				else {
-					swapVelocities(squares[i], squares[j], true, true);
-				}
-			}
-		}
-	}
-}
+//void collisionDetectionNestedLoop(std::vector<Square>& squares) {
+//	for (int i = 0; i < squares.size(); i++) {
+//		for (int j = i + 1; j < squares.size(); j++) {
+//			if (squareCollides(squares[i], squares[j])) {
+//				if (isPlatform(squares[j]) && isOnTop(squares[i], squares[j])) {
+//					squares[i].pos.y = squares[j].edges.top + squares[i].halfs.halfHeight;
+//					squares[i].vel.vy = 0.0f;
+//					squares[i].motionValues.yMotion = false;
+//					squares[i].motionValues.inMotion = false;
+//				}
+//				else if (isPlatform(squares[i]) && isOnTop(squares[j], squares[i])) {
+//					squares[j].pos.y = squares[i].edges.top + squares[j].halfs.halfHeight;
+//					if (std::abs(squares[j].vel.vy) < 0.016f) {
+//						squares[j].vel.vy = 0.0f;
+//					}
+//					squares[j].motionValues.yMotion = false;
+//					squares[j].motionValues.inMotion = false;
+//				}
+//				else {
+//					swapVelocities(squares[i], squares[j], true, true);
+//				}
+//			}
+//		}
+//	}
+//}
 
 void collisionDetectionSweepAndPrune(std::vector<Square> &squares) {
 	std::vector<int> sorted;
@@ -320,7 +319,7 @@ void collisionDetectionSweepAndPrune(std::vector<Square> &squares) {
 			//continue this until full sorted
 		}
 	);
-	// NOTE: Sorting with std:: sort isnt dont in any particular order, 
+	// NOTE: Sorting with std:: sort isnt done in any particular order, 
 
 	std::vector<int> active; // holds active indices that may collide with others
 	std::vector<std::pair<int, int>> candidatePairs; // will hold vector of pairs of canidates close to eachother
@@ -368,17 +367,17 @@ void collisionDetectionSweepAndPrune(std::vector<Square> &squares) {
 				/*std::cout << "(" << i << "," << j << ")" << "\n";*/
 				if (isPlatform(squares[j]) && isOnTop(squares[i], squares[j])) {
 					squares[i].pos.y = squares[j].edges.top + squares[i].halfs.halfHeight;
-					squares[i].pos.y = squares[j].edges.top;
-					squares[i].vel.vy = 0.0f;
-					squares[i].motionValues.yMotion = false;
-					squares[i].motionValues.inMotion = false;
+					if (squares[i].vel.vy <= 0.016f) {
+						squares[i].vel.vy = 0.0f;
+						squares[i].motionValues.yMotion = false;
+					}
 				}
 				else if (isPlatform(squares[i]) && isOnTop(squares[j], squares[i])) {
 					squares[j].pos.y = squares[i].edges.top + squares[j].halfs.halfHeight;
-					squares[j].pos.y = squares[i].edges.top;
-					squares[j].vel.vy = 0.0f;
-					squares[j].motionValues.yMotion = false;
-					squares[j].motionValues.inMotion = false;
+					if (squares[j].vel.vy <= 0.016f) {
+						squares[j].vel.vy = 0.0f;
+						squares[j].motionValues.yMotion = false;
+					}
 				}
 				else {
 					// will calculate the amount of distance the squares are overlapping in both the x and y axis
@@ -386,7 +385,7 @@ void collisionDetectionSweepAndPrune(std::vector<Square> &squares) {
 					float overlapY = std::min(a.edges.top, b.edges.top) - std::max(a.edges.bottom, b.edges.bottom);
 
 					// check if overlapX is less than overlapY
-					if (overlapX < overlapY) {
+					if ((overlapX < overlapY) && (overlapX > 0) && (overlapY > 0)) {
 
 						// this is for HORIZONTAL collison
 						float correction = overlapX / 2; // calculate the correction of the shift
@@ -394,20 +393,24 @@ void collisionDetectionSweepAndPrune(std::vector<Square> &squares) {
 						// if a is to the left of b
 						if (a.pos.x < b.pos.x) {
 							// adjust thier x positions wiht correction
-							a.pos.x -= correction;
-							b.pos.x += correction;
+							if ((overlapX > 0) && (overlapY > 0)) {
+								a.pos.x -= correction;
+								b.pos.x += correction;
 
-							keepInBounds(a, true);
-							keepInBounds(b, true);
+								keepInBounds(a, true);
+								keepInBounds(b, true);
+							}
 
 						}
 						else { // if a is to the right of b
 							// adjust thier x positions wiht correction
-							a.pos.x += correction;
-							b.pos.x -= correction;
+							if ((overlapX > 0) && (overlapY > 0)) {
+								a.pos.x += correction;
+								b.pos.x -= correction;
 
-							keepInBounds(a, true);
-							keepInBounds(b, true);
+								keepInBounds(a, true);
+								keepInBounds(b, true);
+							}
 						}
 						// finally swap thier velocites
 						/*swapVelocities(a, b);*/
@@ -417,19 +420,24 @@ void collisionDetectionSweepAndPrune(std::vector<Square> &squares) {
 						// this is for VERTICAL collison
 						float correction = overlapY / 2;
 						if (a.pos.y < b.pos.y) {
-							a.pos.y -= correction;
-							b.pos.y += correction;
 
-							keepInBounds(a, false);
-							keepInBounds(b, false);
+							if ((overlapX > 0) && (overlapY > 0)) {
+								a.pos.y -= correction;
+								b.pos.y += correction;
+
+								keepInBounds(a, false);
+								keepInBounds(b, false);
+							}
 
 						}
 						else {
-							a.pos.y += correction;
-							b.pos.y -= correction;
+							if ((overlapX > 0) && (overlapY > 0)) {
+								a.pos.y += correction;
+								b.pos.y -= correction;
 
-							keepInBounds(a, false);
-							keepInBounds(b, false);
+								keepInBounds(a, false);
+								keepInBounds(b, false);
+							}
 						}
 						/*swapVelocities(a, b);*/
 						swapVelocities(a, b, false, true);
@@ -449,38 +457,48 @@ void updateGame(std::vector<Square>& squares, float frameDt) {
 
 }
 
+// function to return a random float number between -1 and 1 in ndc
 float randomT() {
 	float t = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
 	return t;
 }
 
-Square createSquare() {
-	Square newSquare;
+// function to create a random square
+Square createSquare() { // no parameters just a return value of Square object
+	Square newSquare; // create new instance of square
 
+	// declare min and max values in NDC
 	float minFloat = -1.0f;
 	float maxFloat = 1.0f;
+
+	// create 4 rnadom floating points between -1 and 1
 	float t1 = randomT();
 	float t2 = randomT();
 	float t3 = randomT();
 	float t4 = randomT();
-	int randPointSize = rand() % 61;
-	if (randPointSize < 10) {
+
+	// create a random pointsize to give to square
+	int randPointSize = rand() % 61; // random between 0 and 60. 
+	if (randPointSize < 10) { // cap the min pointSize to 10
 		randPointSize = 10;
 	}
 
+	// declare random velocity and positions
 	float randomVelX = minFloat + (maxFloat - minFloat) * t1;
 	float randomVelY = minFloat + (maxFloat - minFloat) * t2;
 	float randomPosX = minFloat + (maxFloat - minFloat) * t3;
 	float randomPosY = minFloat + (maxFloat - minFloat) * t4;
 
+	// give square those new positions
 	newSquare.vel.vx = randomVelX;
 	newSquare.vel.vy = randomVelY;
 	newSquare.pos.x = randomPosX;
 	newSquare.pos.y = randomPosY;
 	newSquare.pointSize = static_cast<float>(randPointSize);
 
+	// compute the edges of new square
 	computeEdges(newSquare);
 
 
-	return newSquare;
+	return newSquare; // return it 
 }

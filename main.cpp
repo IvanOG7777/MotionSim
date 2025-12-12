@@ -262,13 +262,22 @@ int main() {
 
 	std::cout << "Point Size: " << std::endl;
 	std::cout << newSquare.pointSize << std::endl;*/
-	while (!glfwWindowShouldClose(window)) {
+	int lastSpaceState = GLFW_RELEASE;
 
-		if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) {
+	while (!glfwWindowShouldClose(window)) {
+		int spaceKey = glfwGetKey(window, GLFW_KEY_SPACE);
+
+		for (auto square : squaresVector) {
+			std::cout << square.pointSize << std::endl;
+		}
+
+		if (spaceKey == GLFW_PRESS && lastSpaceState == GLFW_RELEASE) {
 			Square newSquare = createSquare();
 
 			squaresVector.push_back(newSquare);
 		}
+
+		lastSpaceState = spaceKey;
 
 		updateGame(squaresVector, deltaTime);
 		/*bool running = runningSquares(squaresVector);
