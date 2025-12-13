@@ -10,3 +10,31 @@ Things to add:
 
 TODO FIXES:
 	I think x and y velocites keep running on some conditions so maybe something to subtract a small bit from velocity until its 0.
+
+
+
+	//void collisionDetectionNestedLoop(std::vector<Square>& squares) {
+//	for (int i = 0; i < squares.size(); i++) {
+//		for (int j = i + 1; j < squares.size(); j++) {
+//			if (squareCollides(squares[i], squares[j])) {
+//				if (isPlatform(squares[j]) && isOnTop(squares[i], squares[j])) {
+//					squares[i].pos.y = squares[j].edges.top + squares[i].halfs.halfHeight;
+//					squares[i].vel.vy = 0.0f;
+//					squares[i].motionValues.yMotion = false;
+//					squares[i].motionValues.inMotion = false;
+//				}
+//				else if (isPlatform(squares[i]) && isOnTop(squares[j], squares[i])) {
+//					squares[j].pos.y = squares[i].edges.top + squares[j].halfs.halfHeight;
+//					if (std::abs(squares[j].vel.vy) < 0.016f) {
+//						squares[j].vel.vy = 0.0f;
+//					}
+//					squares[j].motionValues.yMotion = false;
+//					squares[j].motionValues.inMotion = false;
+//				}
+//				else {
+//					swapVelocities(squares[i], squares[j], true, true);
+//				}
+//			}
+//		}
+//	}
+//}

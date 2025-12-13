@@ -185,11 +185,11 @@ bool squareCollides(Square& a, Square& b) { // parameters are 2 square objects
 
 	// calculate the half height and width of both squares
 	float halfWidthSum = a.halfs.halfWidth + b.halfs.halfWidth;
-	float halfHeightSum = a.halfs.halfHeight+ b.halfs.halfHeight;
+	float halfHeightSum = a.halfs.halfHeight + b.halfs.halfHeight;
 
 	// calcualte the distance between the squares x and y current positions
-	float dx = std:: abs(a.pos.x - b.pos.x);
-	float dy = std:: abs(a.pos.y - b.pos.y);
+	float dx = std::abs(a.pos.x - b.pos.x);
+	float dy = std::abs(a.pos.y - b.pos.y);
 
 	// check if the distance betwen square in X axis is greater than thier halfWidthSum
 	// if it is we are to far away on the x axis they we know they dont collide
@@ -233,17 +233,16 @@ void swapVelocities(Square& a, Square& b, bool xAxisChange, bool yAxisChange) {
 	computeEdges(a);
 	computeEdges(b);
 	if (xAxisChange == true && yAxisChange == false) {
-		float tempVelX = a.vel.vx;
 
-		a.vel.vx = b.vel.vx;
-		b.vel.vx = tempVelX;
+		a.vel.vx = -a.vel.vx * e;
+		b.vel.vx = -b.vel.vx * e;
 
 		/*std::cout << a.name << " and " << b.name << " have swapped velocities on x axis" << "\n";*/
 	}
 	else if (xAxisChange == false && yAxisChange == true) {
-		float tempVelY = a.vel.vy;
-		a.vel.vy = b.vel.vy;
-		b.vel.vy = tempVelY;
+
+		a.vel.vy = -a.vel.vy * e;
+		b.vel.vy = -b.vel.vy * e;
 
 		/*std::cout << a.name << " and " << b.name << " have swapped velocities on y axis" << "\n";*/
 	}
@@ -276,33 +275,7 @@ bool isOnTop(Square& squareA, Square& squareB) {
 	return verticalTouch && horizontalOverlap && fallingOrResting;
 }
 
-//void collisionDetectionNestedLoop(std::vector<Square>& squares) {
-//	for (int i = 0; i < squares.size(); i++) {
-//		for (int j = i + 1; j < squares.size(); j++) {
-//			if (squareCollides(squares[i], squares[j])) {
-//				if (isPlatform(squares[j]) && isOnTop(squares[i], squares[j])) {
-//					squares[i].pos.y = squares[j].edges.top + squares[i].halfs.halfHeight;
-//					squares[i].vel.vy = 0.0f;
-//					squares[i].motionValues.yMotion = false;
-//					squares[i].motionValues.inMotion = false;
-//				}
-//				else if (isPlatform(squares[i]) && isOnTop(squares[j], squares[i])) {
-//					squares[j].pos.y = squares[i].edges.top + squares[j].halfs.halfHeight;
-//					if (std::abs(squares[j].vel.vy) < 0.016f) {
-//						squares[j].vel.vy = 0.0f;
-//					}
-//					squares[j].motionValues.yMotion = false;
-//					squares[j].motionValues.inMotion = false;
-//				}
-//				else {
-//					swapVelocities(squares[i], squares[j], true, true);
-//				}
-//			}
-//		}
-//	}
-//}
-
-void collisionDetectionSweepAndPrune(std::vector<Square> &squares) {
+void collisionDetectionSweepAndPrune(std::vector<Square>& squares) {
 	std::vector<int> sorted;
 	sorted.reserve(squares.size());
 
@@ -351,7 +324,7 @@ void collisionDetectionSweepAndPrune(std::vector<Square> &squares) {
 			int j = indexCurrent; // j is equal to curernt index within sorted
 			if (i > j) std::swap(i, j); // prevent same comparision of objects, essentailly checking if i isnt j
 			candidatePairs.emplace_back(i, j); // pass those indices into a pair then into the vector of pairs
-			
+
 		}
 
 		std::sort(candidatePairs.begin(), candidatePairs.end()); // sort the pairs
@@ -384,63 +357,63 @@ void collisionDetectionSweepAndPrune(std::vector<Square> &squares) {
 					float overlapX = std::min(a.edges.right, b.edges.right) - std::max(a.edges.left, b.edges.left);
 					float overlapY = std::min(a.edges.top, b.edges.top) - std::max(a.edges.bottom, b.edges.bottom);
 
+					if (overlapX <= 0 || overlapY <= 0) {
+						continue;
+					}
+
 					// check if overlapX is less than overlapY
-					if ((overlapX < overlapY) && (overlapX > 0) && (overlapY > 0)) {
+					if (overlapX < overlapY) {
 
 						// this is for HORIZONTAL collison
-						float correction = overlapX / 2; // calculate the correction of the shift
+						float correction = overlapX / 2.0f; // calculate the correction of the shift
 
 						// if a is to the left of b
 						if (a.pos.x < b.pos.x) {
 							// adjust thier x positions wiht correction
-							if ((overlapX > 0) && (overlapY > 0)) {
-								a.pos.x -= correction;
-								b.pos.x += correction;
 
-								keepInBounds(a, true);
-								keepInBounds(b, true);
-							}
+							if (a.vel.vx <= b.vel.vx) continue;
+							a.pos.x -= correction;
+							b.pos.x += correction;
 
+							keepInBounds(a, true);
+							keepInBounds(b, true);
+							swapVelocities(a, b, true, false);
 						}
 						else { // if a is to the right of b
 							// adjust thier x positions wiht correction
-							if ((overlapX > 0) && (overlapY > 0)) {
-								a.pos.x += correction;
-								b.pos.x -= correction;
 
-								keepInBounds(a, true);
-								keepInBounds(b, true);
-							}
+							if (a.vel.vx >= b.vel.vx) continue;
+							a.pos.x += correction;
+							b.pos.x -= correction;
+
+							keepInBounds(a, true);
+							keepInBounds(b, true);
+							swapVelocities(a, b, true, false);
+
 						}
-						// finally swap thier velocites
-						/*swapVelocities(a, b);*/
-						swapVelocities(a, b, true, false);
 					}
 					else {
 						// this is for VERTICAL collison
-						float correction = overlapY / 2;
+						float correction = overlapY / 2.0f;
 						if (a.pos.y < b.pos.y) {
+							if (a.vel.vy <= b.vel.vy) continue;
+							a.pos.y -= correction;
+							b.pos.y += correction;
 
-							if ((overlapX > 0) && (overlapY > 0)) {
-								a.pos.y -= correction;
-								b.pos.y += correction;
-
-								keepInBounds(a, false);
-								keepInBounds(b, false);
-							}
-
+							keepInBounds(a, false);
+							keepInBounds(b, false);
+							swapVelocities(a, b, false, true);
 						}
 						else {
-							if ((overlapX > 0) && (overlapY > 0)) {
-								a.pos.y += correction;
-								b.pos.y -= correction;
+							if (a.vel.vy >= b.vel.vy) continue;
+							a.pos.y += correction;
+							b.pos.y -= correction;
 
-								keepInBounds(a, false);
-								keepInBounds(b, false);
-							}
+							keepInBounds(a, false);
+							keepInBounds(b, false);
+							swapVelocities(a, b, false, true);
+
 						}
-						/*swapVelocities(a, b);*/
-						swapVelocities(a, b, false, true);
 					}
 				}
 			}
@@ -451,9 +424,9 @@ void collisionDetectionSweepAndPrune(std::vector<Square> &squares) {
 }
 
 void updateGame(std::vector<Square>& squares, float frameDt) {
-	
-		squaresInMotion(squares, frameDt);
-		collisionDetectionSweepAndPrune(squares);
+
+	squaresInMotion(squares, frameDt);
+	collisionDetectionSweepAndPrune(squares);
 
 }
 
@@ -495,6 +468,7 @@ Square createSquare() { // no parameters just a return value of Square object
 	newSquare.pos.x = randomPosX;
 	newSquare.pos.y = randomPosY;
 	newSquare.pointSize = static_cast<float>(randPointSize);
+	newSquare.mass = static_cast<float>(randPointSize);
 
 	// compute the edges of new square
 	computeEdges(newSquare);

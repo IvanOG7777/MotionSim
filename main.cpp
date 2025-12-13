@@ -126,6 +126,7 @@ int main() {
 
 	squareA.pointSize = 15.0f;
 	squareA.name = "red";
+	squareA.mass = 15.0f;
 
 	squareB.pos.x = -0.8f;
 	squareB.pos.y = 0.6f;
@@ -135,6 +136,7 @@ int main() {
 
 	squareB.pointSize = 30.0f;
 	squareB.name = "blue";
+	squareB.mass = 30.0f;
 
 	squareC.pos.x = -0.2f;
 	squareC.pos.y = 1.0f;
@@ -144,6 +146,7 @@ int main() {
 
 	squareC.pointSize = 60.0f;
 	squareC.name = "pink";
+	squareC.mass = 60.0f;
 
 	squareD.pos.x = 0.5f;
 	squareD.pos.y = -0.6f;
@@ -153,6 +156,7 @@ int main() {
 
 	squareD.pointSize = 50.0f;
 	squareD.name = "green";
+	squareD.mass = 50.0f;
 
 	squaresVector.push_back(squareA);
 	squaresVector.push_back(squareB);
